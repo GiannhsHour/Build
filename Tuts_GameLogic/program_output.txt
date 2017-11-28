@@ -1,0 +1,79 @@
+[14:06:34] Loading Shader:
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexBasic.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragSuperSample.glsl
+[14:06:34]     -> Linking Shader: Success!
+[14:06:34] 
+[14:06:34] Loading Shader:
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexShadow.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/Common/EmptyFragment.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechGeomShadow.glsl
+[14:06:34]     -> Linking Shader: Success!
+[14:06:34] 
+[14:06:34] Loading Shader:
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexFull.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragForwardRender.glsl
+[14:06:34]     -> Linking Shader: Success!
+[14:06:34] 
+[14:06:34] Loading Shader:
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointVertex.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointFragment.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointGeometry.glsl
+[14:06:34]     -> Linking Shader: Success!
+[14:06:34] 
+[14:06:34] Loading Shader:
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Vertex.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/LineGeometry.glsl
+[14:06:34]     -> Linking Shader: Success!
+[14:06:34] 
+[14:06:34] Loading Shader:
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/VertexColOnly.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
+[14:06:34]     -> Linking Shader: Success!
+[14:06:34] 
+[14:06:34] Loading Shader:
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextVertex.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextFragment.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextGeometry.glsl
+[14:06:34]     -> Linking Shader: Success!
+[14:06:34] 
+[14:06:34] Loading Shader:
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexPicker.glsl
+[14:06:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragScreenPicker_nsightfix.glsl
+[14:06:34]     -> Linking Shader: Success!
+[14:06:34] 
+[14:06:34] Loading Mesh: ../../Data/Meshes/cube.obj
+[14:06:34] 
+[14:06:34] Loading Mesh: ../../Data/Meshes/sphere.obj
+[14:06:34] 
+[14:06:34] [SceneManager] - Enqueued scene: "GameLogic Example #1 - Path Following"
+[14:06:34] 
+[14:06:34] [SceneManager] - Scene switched to: "GameLogic Example #1 - Path Following"
+[14:06:34] [SceneManager] - Enqueued scene: "GameLogic Example #2 - Angle Computation"
+[14:06:34] Loading Mesh: ../../Data/Meshes/raptor.obj
+[14:06:35]     -> Loading Texture: ../../Data/Textures/raptor.jpg
+[14:06:35] 
+[14:06:35] [SceneManager] - Enqueued scene: "GameLogic Example #3 - Finite State Machine"
+[14:06:35] Loading Mesh: ../../Data/Meshes/cube.obj
+[14:06:35] 
+[14:06:35] [SceneManager] - Enqueued scene: "GameLogic Example #4 - Path Finding"
+[14:08:14] [SceneManager] - Exiting scene -
+[14:08:14] 
+[14:08:14] [SceneManager] - Scene switched to: "GameLogic Example #4 - Path Finding"
+[14:08:14] Physics too slow to run in real time!
+[14:08:15] [SceneManager] - Exiting scene -
+[14:08:15] 
+[14:08:15] [SceneManager] - Scene switched to: "GameLogic Example #3 - Finite State Machine"
+[14:08:15] [SceneManager] - Exiting scene -
+[14:08:15] 
+[14:08:15] [SceneManager] - Scene switched to: "GameLogic Example #2 - Angle Computation"
+[14:08:16] [SceneManager] - Exiting scene -
+[14:08:16] 
+[14:08:16] [SceneManager] - Scene switched to: "GameLogic Example #1 - Path Following"
+[14:08:16] [SceneManager] - Exiting scene -
+[14:08:16] 
+[14:08:16] [SceneManager] - Scene switched to: "GameLogic Example #4 - Path Finding"
+[14:08:16] Physics too slow to run in real time!
+[14:08:17] [SceneManager] - Exiting scene -
+[14:08:17] 
+[14:08:17] [SceneManager] - Scene switched to: "GameLogic Example #3 - Finite State Machine"
