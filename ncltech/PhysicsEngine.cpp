@@ -159,6 +159,52 @@ void PhysicsEngine::UpdatePhysics()
 	perfUpdate.EndTimingSection();
 }
 
+bool PhysicsEngine::SphereSphereInterface(PhysicsNode* obj1, PhysicsNode* obj2, CollisionShape* shape1, CollisionShape* shape2) {
+
+ float radius1 = 0.0f;
+ float radius2 = 0.0f;
+ // Check that both shapes are Spheres
+ SphereCollisionShape * sphere1 = dynamic_cast <SphereCollisionShape * >(shape1);
+ if (sphere1) {
+	 radius1 = sphere1->GetRadius();
+ }
+ else {
+	 CuboidCollisionShape* sphere1 = dynamic_cast <CuboidCollisionShape * >(shape1);
+	 if (sphere1) {
+		 vector<float> v;
+		 radius1 = max(sphere1->GetHalfHeight(), sphere1->GetHalfWidth());
+		 radius1 = max(radius1, sphere1->GetHalfDepth());
+		
+	 }
+ }
+
+
+ SphereCollisionShape * sphere2 = dynamic_cast <SphereCollisionShape * >(shape2);
+ if (sphere2)
+	 radius2 = sphere2->GetRadius();
+ else {
+	 CuboidCollisionShape* sphere2 = dynamic_cast <CuboidCollisionShape * >(shape2);
+	 if (sphere2) {
+		 vector<float> v;
+		 radius2 = max(sphere2->GetHalfHeight(), sphere2->GetHalfWidth());
+		 radius2 = max(radius2, sphere2->GetHalfDepth());
+	 }
+  }
+ radius1 *= 2;
+ radius2 *= 2;
+ // Sphere - Sphere Check
+ float sum_radius = radius1 + radius2;
+ float sum_radius_squared = sum_radius * sum_radius;
+
+ Vector3 ab = obj2->GetPosition() - obj1->GetPosition();
+ float distance_squared = Vector3::Dot(ab, ab);
+
+ return (distance_squared <= sum_radius_squared);
+ // True if distance between centre points is less or equal
+ // to the sum of the two radii
+
+}
+
 void PhysicsEngine::BroadPhaseCollisions()
 {
 	broadphaseColPairs.clear();
@@ -184,11 +230,13 @@ void PhysicsEngine::BroadPhaseCollisions()
 				//Check they both atleast have collision shapes
 				if (pnodeA->GetCollisionShape() != NULL
 					&& pnodeB->GetCollisionShape() != NULL)
-				{
-					CollisionPair cp;
-					cp.pObjectA = pnodeA;
-					cp.pObjectB = pnodeB;
-					broadphaseColPairs.push_back(cp);
+				{   
+					if (SphereSphereInterface(pnodeA, pnodeB, pnodeA->GetCollisionShape(), pnodeB->GetCollisionShape())) {
+						CollisionPair cp;
+						cp.pObjectA = pnodeA;
+						cp.pObjectB = pnodeB;
+						broadphaseColPairs.push_back(cp);
+					}
 				}
 
 			}
@@ -200,7 +248,8 @@ void PhysicsEngine::BroadPhaseCollisions()
 void PhysicsEngine::NarrowPhaseCollisions()
 {
 	if (broadphaseColPairs.size() > 0)
-	{
+	{   
+		//cout << broadphaseColPairs.size() << endl;
 		//Collision data to pass between detection and manifold generation stages.
 		CollisionData colData;				
 
@@ -224,7 +273,7 @@ void PhysicsEngine::NarrowPhaseCollisions()
 			//--TUTORIAL 4 CODE--
 			// Detects if the objects are colliding
 			if (colDetect.AreColliding(&colData))
-			{
+			{    
 				//Note: As at the end of tutorial 4 we have very little to do, this is a bit messier
 				//      than it should be. We now fire oncollision events for the two objects so they
 				//      can handle AI and also optionally draw the collision normals to see roughly

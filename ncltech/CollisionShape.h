@@ -56,7 +56,6 @@ public:
 	inline		 PhysicsNode* Parent()		 { return m_Parent; }
 	inline const PhysicsNode* Parent() const { return m_Parent; }
 
-
 //<----- USED BY COLLISION DETECTION ----->
 	// Get all collision axes between the current shape and the given
 	// object to be tested. The axes returned are just for the shape in question

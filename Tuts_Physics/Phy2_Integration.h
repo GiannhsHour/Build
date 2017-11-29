@@ -58,7 +58,7 @@ public:
 			Vector3(10.0f, 0.1f, 2.f),				//Scale
 			false,									//No Physics Yet
 			0.0f,									//No Physical Mass Yet
-			false,									//No Collision Shape 
+			true,									//No Collision Shape 
 			false,									//Not Dragable By the user
 			Vector4(0.2f, 1.0f, 0.5f, 1.0f)));		//Color
 

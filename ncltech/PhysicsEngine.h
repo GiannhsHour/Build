@@ -40,6 +40,8 @@ Description:
 #include "Manifold.h"
 #include <nclgl\TSingleton.h>
 #include <nclgl\PerfTimer.h>
+#include "SphereCollisionShape.h"
+#include "CuboidCollisionShape.h"
 #include <vector>
 #include <mutex>
 
@@ -117,6 +119,8 @@ public:
 		perfNarrowphase.PrintOutputToStatusEntry(color,	"    Narrowphase :");
 		perfSolver.PrintOutputToStatusEntry(color,		"    Solver      :");
 	}
+
+	bool SphereSphereInterface(PhysicsNode* obj1, PhysicsNode* obj2, CollisionShape* shape1, CollisionShape* shape2);
 
 protected:
 	PhysicsEngine();
