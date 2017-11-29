@@ -167,29 +167,36 @@ public:
 		m_Sphere3->Render()->AddChild(sphereRender2);
 		m_Sphere3->SetPhysics(new PhysicsNode());
 		m_Sphere3->Physics()->SetInverseMass(1.f);
+	
 		Camera * camera = GraphicsPipeline::Instance()->GetCamera();
 		float yaw = camera->GetYaw();
 		float pitch = camera->GetPitch();
-		float fx, fz;
+		float fx, fz, fy;
 		m_Sphere3->Physics()->SetPosition(camera->GetPosition());
-		if (yaw < 90) {
+		fx =  -sin(DegToRad(yaw));
+		fz =  -cos(DegToRad(yaw));
+		fy =   sin(DegToRad(pitch));
+		float absp = 1 - (abs(fy));
+	/*	if (yaw < 90) {
 			fx = -(int)yaw % 90 / (float)90;
-			fz = -(1 - fx);
+			fz = -1 - fx;
 		}
 		else if (yaw < 180) {
-			fx = -(int)yaw % 90 / (float)90;
-			fz =  (1 - fx);
+			fx = -(1 - (int)yaw % 90 / (float)90);
+			fz =  1 + fx;
 		}
 		else if (yaw < 270) {
 			fx = (int)yaw % 90 / (float)90;
-			fz = (1 - fx);
+			fz = 1 - fx;
 		}
 		else  {
-			fx = (int)yaw % 90 / (float)90;
-			fz = -(1 - fx);
-		}
-
-		m_Sphere3->Physics()->SetForce(Vector3(fx*2, -1.f, fz*2));
+			fx = 1 - (int)yaw % 90 / (float)90;
+			fz = -1 + fx;
+		}*/
+		cout << pitch <<  endl;
+		m_Sphere3->Physics()->SetForce(Vector3(0, -3 , 0));
+		m_Sphere3->Physics()->SetLinearVelocity((Vector3(fx * 15 , 2 + pitch * 0.5, fz * 15 )));
+		m_Sphere3->Physics()->SetAngularVelocity((Vector3(-5, 0, 0)));
 		this->AddGameObject(m_Sphere3);
 	}
 

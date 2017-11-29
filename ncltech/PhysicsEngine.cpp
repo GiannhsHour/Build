@@ -140,7 +140,8 @@ void PhysicsEngine::UpdatePhysics()
 	// precompute values based off current velocities 
 	// before they are updated loop below.
 	for (Constraint* c : constraints) c->PreSolverStep(updateTimestep);
-	for (Constraint * c : constraints) c -> ApplyImpulse();
+	for (Constraint * c : constraints) c -> ApplyImpulse();
+
 
 //4. Update Velocities
 	perfUpdate.BeginTimingSection();
