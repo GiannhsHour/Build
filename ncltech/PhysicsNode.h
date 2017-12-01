@@ -89,6 +89,8 @@ public:
 	//<--------- GETTERS ------------->
 	inline GameObject*			GetParent()					const { return parent; }
 
+	
+
 	inline float				GetElasticity()				const { return elasticity; }
 	inline float				GetFriction()				const { return friction; }
 
@@ -107,9 +109,11 @@ public:
 	const Matrix4&				GetWorldSpaceTransform()    const { return worldTransform; }
 
 
+	inline float				GetColRadius()				const { return colRadius; }
 
 
 	//<--------- SETTERS ------------->
+	inline void					SetColRadius(float r) { colRadius = r; }
 	inline void SetParent(GameObject* obj)							{ parent = obj; }
 
 	inline void SetElasticity(float elasticityCoeff)				{ elasticity = elasticityCoeff; }
@@ -156,6 +160,8 @@ public:
 	
 
 protected:
+	float colRadius;
+
 	//Useful parameters
 	GameObject*				parent;
 	Matrix4					worldTransform;

@@ -125,6 +125,7 @@ GameObject* CommonUtils::BuildSphereObject(
 		pnode = new PhysicsNode();
 		pnode->SetPosition(pos);
 		pnode->SetInverseMass(inverse_mass);
+		pnode->SetColRadius(radius);
 
 		if (!collidable)
 		{
@@ -179,6 +180,8 @@ GameObject* CommonUtils::BuildCuboidObject(
 		pnode = new PhysicsNode();
 		pnode->SetPosition(pos);
 		pnode->SetInverseMass(inverse_mass);
+		float rad = sqrt(halfdims.x*halfdims.x + halfdims.y*halfdims.y + halfdims.z*halfdims.z);
+		pnode->SetColRadius(rad);
 
 		if (!collidable)
 		{

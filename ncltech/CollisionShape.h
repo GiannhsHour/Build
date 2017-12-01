@@ -49,6 +49,8 @@ public:
 	//   a good source for non-inverse inertia matricies can be found here: https://en.wikipedia.org/wiki/List_of_moments_of_inertia
 	virtual Matrix3 BuildInverseInertia(float invMass) const = 0;
 
+
+
 	// Draws this collision shape to the debug renderer
 	virtual void DebugDraw() const {};
 
@@ -86,4 +88,6 @@ public:
 
 protected:
 	PhysicsNode* m_Parent;
+
+
 };

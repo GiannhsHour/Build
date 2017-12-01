@@ -134,13 +134,17 @@ void PhysicsEngine::UpdatePhysics()
 	NarrowPhaseCollisions();
 	perfNarrowphase.EndTimingSection();
 
-
+	std::random_shuffle(manifolds.begin(), manifolds.end());
+	std::random_shuffle(constraints.begin(), constraints.end());
 //3. Initialize Constraint Params (precompute elasticity/baumgarte factor etc)
 	//Optional step to allow constraints to 
 	// precompute values based off current velocities 
 	// before they are updated loop below.
-	for (Constraint* c : constraints) c->PreSolverStep(updateTimestep);
-	for (Constraint * c : constraints) c -> ApplyImpulse();
+	for (Manifold * m : manifolds) m -> PreSolverStep(updateTimestep);
+	for (Constraint* c : constraints) c -> PreSolverStep(updateTimestep);
+	
+
+
 
 
 //4. Update Velocities
@@ -150,7 +154,10 @@ void PhysicsEngine::UpdatePhysics()
 
 //5. Constraint Solver
 	perfSolver.BeginTimingSection();
-	for (Constraint* c : constraints) c->ApplyImpulse();
+	for (size_t i = 0; i < SOLVER_ITERATIONS; ++i) {
+		for (Constraint* c : constraints) c->ApplyImpulse();
+		for (Manifold * m : manifolds) m->ApplyImpulse();
+	}
 	perfSolver.EndTimingSection();
 
 //6. Update Positions (with final 'real' velocities)
@@ -161,37 +168,8 @@ void PhysicsEngine::UpdatePhysics()
 
 bool PhysicsEngine::SphereSphereInterface(PhysicsNode* obj1, PhysicsNode* obj2, CollisionShape* shape1, CollisionShape* shape2) {
 
- float radius1 = 0.0f;
- float radius2 = 0.0f;
- // Check that both shapes are Spheres
- SphereCollisionShape * sphere1 = dynamic_cast <SphereCollisionShape * >(shape1);
- if (sphere1) {
-	 radius1 = sphere1->GetRadius();
- }
- else {
-	 CuboidCollisionShape* sphere1 = dynamic_cast <CuboidCollisionShape * >(shape1);
-	 if (sphere1) {
-		 vector<float> v;
-		 radius1 = max(sphere1->GetHalfHeight(), sphere1->GetHalfWidth());
-		 radius1 = max(radius1, sphere1->GetHalfDepth());
-		
-	 }
- }
-
-
- SphereCollisionShape * sphere2 = dynamic_cast <SphereCollisionShape * >(shape2);
- if (sphere2)
-	 radius2 = sphere2->GetRadius();
- else {
-	 CuboidCollisionShape* sphere2 = dynamic_cast <CuboidCollisionShape * >(shape2);
-	 if (sphere2) {
-		 vector<float> v;
-		 radius2 = max(sphere2->GetHalfHeight(), sphere2->GetHalfWidth());
-		 radius2 = max(radius2, sphere2->GetHalfDepth());
-	 }
-  }
- radius1 *= 1.4f;
- radius2 *= 1.4f;
+ float radius1 = obj1->GetColRadius();
+ float radius2 = obj2->GetColRadius();
  // Sphere - Sphere Check
  float sum_radius = radius1 + radius2;
  float sum_radius_squared = sum_radius * sum_radius;
