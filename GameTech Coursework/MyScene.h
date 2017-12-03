@@ -89,7 +89,7 @@ public:
 		{
 
 			this->AddGameObject(CommonUtils::BuildCuboidObject("rotating_cuboid1",
-				cc_pos + Vector3(0.75f, 0.0f, 0.0f),	//Position leading to 0.25 meter overlap on faces, and more on diagonals
+				Vector3(0.0f, 1.5f, 0.0f),	//Position leading to 0.25 meter overlap on faces, and more on diagonals
 				Vector3(0.5f, 0.5f, 0.5f),				//Half dimensions
 				true,									//Has Physics Object
 				0.0f,									//Infinite Mass
@@ -107,14 +107,15 @@ public:
 				CommonUtils::GenColor(0.5f, 1.0f)));	//Color
 		}
 
+	
+
 	}
 
 	float m_AccumTime;
 	virtual void OnUpdateScene(float dt) override
 	{
 		Scene::OnUpdateScene(dt);
-
-
+		
 		//Update Rotating Objects!
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_1))
 		{

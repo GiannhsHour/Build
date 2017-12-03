@@ -44,6 +44,7 @@ Description:
 #include "CuboidCollisionShape.h"
 #include <vector>
 #include <mutex>
+#include "OcTree.h"
 
 
 //Number of jacobi iterations to apply in order to
@@ -112,6 +113,8 @@ public:
 
 	inline float GetDeltaTime() const			{ return updateTimestep; }
 
+	static inline OcTree* GetOcTree()  { return octree; }
+
 	void PrintPerformanceTimers(const Vector4& color)
 	{
 		perfUpdate.PrintOutputToStatusEntry(color,		"    Integration :");
@@ -121,6 +124,8 @@ public:
 	}
 
 	bool SphereSphereInterface(PhysicsNode* obj1, PhysicsNode* obj2, CollisionShape* shape1, CollisionShape* shape2);
+
+	
 
 protected:
 	PhysicsEngine();
@@ -143,6 +148,8 @@ protected:
 	Vector3		gravity;
 	float		dampingFactor;
 
+	
+	static OcTree* octree;
 
 	std::vector<CollisionPair>  broadphaseColPairs;
 
