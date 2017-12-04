@@ -150,7 +150,7 @@ void PhysicsEngine::UpdatePhysics()
 	perfNarrowphase.EndTimingSection();
 	if (OcTree::isEnabled()) {
 		OcTree::leaves.clear();
-		OcTree::draw(PhysicsEngine::GetOcTree());
+		//OcTree::draw(PhysicsEngine::GetOcTree());
 		OcTree::deleteTree(PhysicsEngine::GetOcTree());
 	}
 	std::random_shuffle(manifolds.begin(), manifolds.end());
@@ -161,8 +161,6 @@ void PhysicsEngine::UpdatePhysics()
 	// before they are updated loop below.
 	for (Manifold * m : manifolds) m -> PreSolverStep(updateTimestep);
 	for (Constraint* c : constraints) c -> PreSolverStep(updateTimestep);
-	
-
 	
 
 

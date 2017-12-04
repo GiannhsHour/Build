@@ -53,8 +53,8 @@ void Initialize()
 	PhysicsEngine::Instance();
 
 	//Enqueue All Scenes
-	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #2 - Peace and quiet"));
 	SceneManager::Instance()->EnqueueScene(new MyScene("CourseWork Scene"));
+	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #2 - Peace and quiet"));
 	SceneManager::Instance()->EnqueueScene(new TestScene("GameTech #1 - Framework Sandbox!"));
 	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #3 - More peace and quiet"));
 	
@@ -89,6 +89,7 @@ void PrintStatusEntries()
 		timer_render.PrintOutputToStatusEntry(status_colour, "          Render Scene   :");
 	}
 	NCLDebug::AddStatusEntry(status_colour, "");
+	NCLDebug::AddStatusEntry(status_colour, "OcTree: %s", OcTree::isEnabled() ? "On" : "Off");  
 }
 
 
@@ -163,7 +164,7 @@ int main()
 		timer_physics.BeginTimingSection();
 		PhysicsEngine::Instance()->Update(dt);
 		timer_physics.EndTimingSection();
-		PhysicsEngine::Instance()->DebugRender();
+		//PhysicsEngine::Instance()->DebugRender();
 
 		//Render Scene
 		timer_render.BeginTimingSection();

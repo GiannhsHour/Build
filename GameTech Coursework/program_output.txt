@@ -1,64 +1,63 @@
-[14:43:44] Loading Shader:
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexBasic.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragSuperSample.glsl
-[14:43:44]     -> Linking Shader: Success!
-[14:43:44] 
-[14:43:44] Loading Shader:
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexShadow.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/Common/EmptyFragment.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechGeomShadow.glsl
-[14:43:44]     -> Linking Shader: Success!
-[14:43:44] 
-[14:43:44] Loading Shader:
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexFull.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragForwardRender.glsl
-[14:43:44]     -> Linking Shader: Success!
-[14:43:44] 
-[14:43:44] Loading Shader:
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointVertex.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointFragment.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointGeometry.glsl
-[14:43:44]     -> Linking Shader: Success!
-[14:43:44] 
-[14:43:44] Loading Shader:
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Vertex.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/LineGeometry.glsl
-[14:43:44]     -> Linking Shader: Success!
-[14:43:44] 
-[14:43:44] Loading Shader:
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/VertexColOnly.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
-[14:43:44]     -> Linking Shader: Success!
-[14:43:44] 
-[14:43:44] Loading Shader:
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextVertex.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextFragment.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextGeometry.glsl
-[14:43:44]     -> Linking Shader: Success!
-[14:43:44] 
-[14:43:44] Loading Shader:
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexPicker.glsl
-[14:43:44]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragScreenPicker_nsightfix.glsl
-[14:43:44]     -> Linking Shader: Success!
-[14:43:44] 
-[14:43:44] Loading Mesh: ../../Data/Meshes/cube.obj
-[14:43:44] 
-[14:43:44] Loading Mesh: ../../Data/Meshes/sphere.obj
-[14:43:44] 
-[14:43:44] [SceneManager] - Enqueued scene: "GameTech #2 - Peace and quiet"
-[14:43:44] 
-[14:43:44] [SceneManager] - Scene switched to: "GameTech #2 - Peace and quiet"
-[14:43:44] [SceneManager] - Enqueued scene: "CourseWork Scene"
-[14:43:44] [SceneManager] - Enqueued scene: "GameTech #1 - Framework Sandbox!"
-[14:43:44] [SceneManager] - Enqueued scene: "GameTech #3 - More peace and quiet"
-[14:43:44] [SceneManager] - Exiting scene -
-[14:43:44] 
-[14:43:44] [SceneManager] - Scene switched to: "GameTech #2 - Peace and quiet"
-[14:43:45] [SceneManager] - Exiting scene -
-[14:43:45] 
-[14:43:45] [SceneManager] - Scene switched to: "CourseWork Scene"
-[14:43:45] [SceneManager] - Exiting scene -
-[14:43:45] 
-[14:43:45] This is a log entry - It will printed to the console, on screen log and <project_dir>program_output.txt
-[14:43:45] [SceneManager] - Scene switched to: "GameTech #1 - Framework Sandbox!"
+[21:39:00] Loading Shader:
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexBasic.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragSuperSample.glsl
+[21:39:00]     -> Linking Shader: Success!
+[21:39:00] 
+[21:39:00] Loading Shader:
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexShadow.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/Common/EmptyFragment.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechGeomShadow.glsl
+[21:39:00]     -> Linking Shader: Success!
+[21:39:00] 
+[21:39:00] Loading Shader:
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexFull.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragForwardRender.glsl
+[21:39:00]     -> Linking Shader: Success!
+[21:39:00] 
+[21:39:00] Loading Shader:
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointVertex.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointFragment.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointGeometry.glsl
+[21:39:00]     -> Linking Shader: Success!
+[21:39:00] 
+[21:39:00] Loading Shader:
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Vertex.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/LineGeometry.glsl
+[21:39:00]     -> Linking Shader: Success!
+[21:39:00] 
+[21:39:00] Loading Shader:
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/VertexColOnly.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
+[21:39:00]     -> Linking Shader: Success!
+[21:39:00] 
+[21:39:00] Loading Shader:
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextVertex.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextFragment.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextGeometry.glsl
+[21:39:00]     -> Linking Shader: Success!
+[21:39:00] 
+[21:39:00] Loading Shader:
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexPicker.glsl
+[21:39:00]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragScreenPicker_nsightfix.glsl
+[21:39:00]     -> Linking Shader: Success!
+[21:39:00] 
+[21:39:00] Loading Mesh: ../../Data/Meshes/cube.obj
+[21:39:00] 
+[21:39:00] Loading Mesh: ../../Data/Meshes/sphere.obj
+[21:39:00] 
+[21:39:00] [SceneManager] - Enqueued scene: "CourseWork Scene"
+[21:39:00] 
+[21:39:00] [SceneManager] - Scene switched to: "CourseWork Scene"
+[21:39:00] [SceneManager] - Enqueued scene: "GameTech #2 - Peace and quiet"
+[21:39:00] [SceneManager] - Enqueued scene: "GameTech #1 - Framework Sandbox!"
+[21:39:00] [SceneManager] - Enqueued scene: "GameTech #3 - More peace and quiet"
+[21:39:08] [SceneManager] - Exiting scene -
+[21:39:08] 
+[21:39:08] [SceneManager] - Scene switched to: "CourseWork Scene"
+[21:39:18] [SceneManager] - Exiting scene -
+[21:39:18] 
+[21:39:18] [SceneManager] - Scene switched to: "CourseWork Scene"
+[21:39:24] [SceneManager] - Exiting scene -
+[21:39:24] 
+[21:39:24] [SceneManager] - Scene switched to: "CourseWork Scene"
