@@ -3,6 +3,7 @@
 #include <nclgl\Window.h>
 #include <nclgl\NCLDebug.h>
 #include <nclgl\PerfTimer.h>
+#include <ncltech\OcTree.h>
 
 #include "TestScene.h"
 #include "EmptyScene.h"
@@ -116,6 +117,11 @@ void HandleKeyboardInputs()
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 		show_perf_metrics = !show_perf_metrics;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_O))
+		OcTree::toggle();
+
+
 }
 
 
@@ -163,6 +169,9 @@ int main()
 		timer_render.BeginTimingSection();
 		GraphicsPipeline::Instance()->UpdateScene(dt);
 		GraphicsPipeline::Instance()->RenderScene();
+
+	
+
 		{
 			//Forces synchronisation if vsync is disabled
 			// - This is solely to allow accurate estimation of render time

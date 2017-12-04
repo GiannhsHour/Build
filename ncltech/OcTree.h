@@ -30,6 +30,16 @@ public:
 
 	static std::vector<OcTree*> leaves;
 
+	static void enable() {	isActive = true;}
+
+	static void disable() {	isActive = false;}
+
+	static void toggle() {	isActive = !isActive;}
+
+	static bool isEnabled() { return isActive; }
+
+	static void setCapacity(int c) { capacity = c; }
+
 	std::vector<PhysicsNode*> objectsIn;
 
 
@@ -41,8 +51,8 @@ private:
 
 	AABB* boundary;
 
-	
+	static bool isActive;
 
-	static const int capacity = 10;
+	static int capacity;
 };
  

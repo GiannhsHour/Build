@@ -12,7 +12,7 @@ class Phy7_Solver : public Scene
 public:
 	Phy7_Solver(const std::string& friendly_name)
 		: Scene(friendly_name)
-		, m_StackHeight(6)
+		, m_StackHeight(20)
 	{}
 
 	int m_StackHeight;

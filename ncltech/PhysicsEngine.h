@@ -135,6 +135,8 @@ protected:
 	void UpdatePhysics();
 
 	//Handles broadphase collision detection
+	void BroadPhaseCollisionsOcTree();
+
 	void BroadPhaseCollisions();
 
 	//Handles narrowphase collision detection
