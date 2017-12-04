@@ -19,9 +19,7 @@ bool OcTree::insert(PhysicsNode* p) {
 		this->subdivide();
 		for (int i = 0; i < objectsIn.size(); i++) {
 			for (int j = 0; j < 8; j++) {
-				if (children[j]->insert(objectsIn[i])) {
-					break;
-				}
+				children[j]->insert(objectsIn[i]);
 			}
 		}
 	}

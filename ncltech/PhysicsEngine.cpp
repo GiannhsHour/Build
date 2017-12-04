@@ -3,7 +3,7 @@
 #include "CollisionDetectionSAT.h"
 #include <nclgl\NCLDebug.h>
 #include <nclgl\Window.h>
-
+#include <set>
 #include <omp.h>
 #include <algorithm>
 
@@ -130,7 +130,7 @@ void PhysicsEngine::UpdatePhysics()
 //1. Broadphase Collision Detection (Fast and dirty)
 	perfBroadphase.BeginTimingSection();
 	//if (octree) delete octree;
-	octree = new OcTree(new AABB(Vector3(0, 20, 0), 20));
+	octree = new OcTree(new AABB(Vector3(0, 0, 0), 50));
 	for (int i = 0; i < physicsNodes.size(); i++) {
 		octree->insert(physicsNodes[i]);
 	}
@@ -200,6 +200,46 @@ bool PhysicsEngine::SphereSphereInterface(PhysicsNode* obj1, PhysicsNode* obj2, 
 
 }
 
+//void PhysicsEngine::BroadPhaseCollisions()
+//{
+//	broadphaseColPairs.clear();
+//
+//	PhysicsNode *pnodeA, *pnodeB;
+//	//	The broadphase needs to build a list of all potentially colliding objects in the world,
+//	//	which then get accurately assesed in narrowphase. If this is too coarse then the system slows down with
+//	//	the complexity of narrowphase collision checking, if this is too fine then collisions may be missed.
+//
+//
+//	//	Brute force approach.
+//	//  - For every object A, assume it could collide with every other object.. 
+//	//    even if they are on the opposite sides of the world.
+//	if (physicsNodes.size() > 0)
+//	{ 
+//		for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
+//		{
+//			for (size_t j = i + 1; j < physicsNodes.size(); ++j)
+//			{
+//				pnodeA = physicsNodes[i];
+//				pnodeB = physicsNodes[j];
+//
+//				//Check they both atleast have collision shapes
+//				if (pnodeA->GetCollisionShape() != NULL
+//					&& pnodeB->GetCollisionShape() != NULL)
+//				{   
+//				//	if (SphereSphereInterface(pnodeA, pnodeB, pnodeA->GetCollisionShape(), pnodeB->GetCollisionShape())) {
+//						CollisionPair cp;
+//						cp.pObjectA = pnodeA;
+//						cp.pObjectB = pnodeB;
+//						broadphaseColPairs.push_back(cp);
+//			//		}
+//				}
+//
+//			}
+//		}
+//	}
+//}
+
+
 void PhysicsEngine::BroadPhaseCollisions()
 {
 	broadphaseColPairs.clear();
@@ -209,80 +249,46 @@ void PhysicsEngine::BroadPhaseCollisions()
 	//	which then get accurately assesed in narrowphase. If this is too coarse then the system slows down with
 	//	the complexity of narrowphase collision checking, if this is too fine then collisions may be missed.
 
-
+	set<pair<PhysicsNode*, PhysicsNode*>> pairs;
+	set<pair<PhysicsNode*, PhysicsNode*>>::iterator it;
+	int c=0;
 	//	Brute force approach.
-	//  - For every object A, assume it could collide with every other object.. 
+	//  - For every object A, assume it could collide with every other object..
 	//    even if they are on the opposite sides of the world.
-	if (physicsNodes.size() > 0)
-	{ 
-		for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
+
+	for (int l = 0; l < OcTree::leaves.size(); l++) {
+
+		for (size_t i = 0; i < OcTree::leaves[l]->objectsIn.size(); ++i)
 		{
-			for (size_t j = i + 1; j < physicsNodes.size(); ++j)
+			for (size_t j = i + 1; j < OcTree::leaves[l]->objectsIn.size(); ++j)
 			{
-				pnodeA = physicsNodes[i];
-				pnodeB = physicsNodes[j];
-
-				//Check they both atleast have collision shapes
-				if (pnodeA->GetCollisionShape() != NULL
-					&& pnodeB->GetCollisionShape() != NULL)
-				{   
-					if (SphereSphereInterface(pnodeA, pnodeB, pnodeA->GetCollisionShape(), pnodeB->GetCollisionShape())) {
-						CollisionPair cp;
-						cp.pObjectA = pnodeA;
-						cp.pObjectB = pnodeB;
-						broadphaseColPairs.push_back(cp);
+				pnodeA = OcTree::leaves[l]->objectsIn[i];
+				pnodeB = OcTree::leaves[l]->objectsIn[j];
+					//Check they both atleast have collision shapes
+					if (pnodeA->GetCollisionShape() != NULL
+						&& pnodeB->GetCollisionShape() != NULL)
+					{
+							
+						std::pair<PhysicsNode*, PhysicsNode*> pair1 = std::make_pair(pnodeA, pnodeB);
+						std::pair<PhysicsNode*, PhysicsNode*> pair2 = std::make_pair(pnodeB, pnodeA);
+						pairs.insert(pair1);
+						pairs.insert(pair2);
 					}
-				}
-
 			}
 		}
 	}
-}
-
-/*
-void PhysicsEngine::BroadPhaseCollisions()
-{
-broadphaseColPairs.clear();
-
-PhysicsNode *pnodeA, *pnodeB;
-//	The broadphase needs to build a list of all potentially colliding objects in the world,
-//	which then get accurately assesed in narrowphase. If this is too coarse then the system slows down with
-//	the complexity of narrowphase collision checking, if this is too fine then collisions may be missed.
-
-
-//	Brute force approach.
-//  - For every object A, assume it could collide with every other object..
-//    even if they are on the opposite sides of the world.
-if (OcTree::leaves.size() > 1)
-{
-//	for (int l = 0; l < OcTree::leaves->size(); l++) {
-for (int l = 0; l < OcTree::leaves.size(); l++) {
-
-for (size_t i = 0; i < OcTree::leaves[l]->objectsIn.size(); ++i)
-{
-for (size_t j = i + 1; j < OcTree::leaves[l]->objectsIn.size(); ++j)
-{
-pnodeA = OcTree::leaves[l]->objectsIn[i];
-pnodeB = OcTree::leaves[l]->objectsIn[j];
-
-//Check they both atleast have collision shapes
-if (pnodeA->GetCollisionShape() != NULL
-&& pnodeB->GetCollisionShape() != NULL)
-{
-if (SphereSphereInterface(pnodeA, pnodeB, pnodeA->GetCollisionShape(), pnodeB->GetCollisionShape())) {
-CollisionPair cp;
-cp.pObjectA = pnodeA;
-cp.pObjectB = pnodeB;
-broadphaseColPairs.push_back(cp);
-}
-}
+		for (it = pairs.begin(); it != pairs.end(); ++it) {	
+			if (SphereSphereInterface((*it).first, (*it).second, (*it).first->GetCollisionShape(), (*it).second->GetCollisionShape())) {
+				CollisionPair cp;
+				cp.pObjectA = (*it).first;
+				cp.pObjectB = (*it).second;
+				broadphaseColPairs.push_back(cp);
+			}
+			it++;
+		}
 
 }
-}
-}
-}
-}
-*/
+
 
 void PhysicsEngine::NarrowPhaseCollisions()
 {
