@@ -101,7 +101,7 @@ public:
 
 		auto create_ball_cube = [&](const Vector3& offset, const Vector3& scale, float ballsize)
 		{
-			const int dims = 14;
+			const int dims = 10;
 			 
 
 			for (int x = 0; x < dims/2; ++x)
@@ -114,7 +114,7 @@ public:
 						float randomy = rand() % 10 / 10.0f;
 						float randomz = rand() % 10 / 10.0f;
 						Vector4 col = Vector4(randomx, randomy, randomz, 1.0f);
-						Vector3 pos = offset + Vector3(scale.x *x, scale.y * y, scale.z * z);
+						Vector3 pos = offset +Vector3(randomx*2, randomy*2, randomz*2) + Vector3(scale.x *x, scale.y * y, scale.z * z);
 						GameObject* sphere = CommonUtils::BuildSphereObject(
 							"",					// Optional: Name
 							pos,				// Position
@@ -129,7 +129,7 @@ public:
 				}
 			}
 		};
-		create_ball_cube(Vector3(-2.0f, 5.5f,-2.5f), Vector3(0.5f, 0.5f, 0.5f), 0.1f);
+		create_ball_cube(Vector3(-2.0f, 5.5f,-2.5f), Vector3(0.5f, 0.5f, 0.5f), 0.3f);
 
 	
 
@@ -169,6 +169,7 @@ public:
 
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "--- Controls ---");
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "    Hold [1] to rotate objects");
+		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "		OcTree: %s", OcTree::isEnabled() ? "on" : "off" );
 	}
 
 };

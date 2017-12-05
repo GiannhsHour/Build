@@ -130,8 +130,11 @@ void PhysicsEngine::UpdatePhysics()
 //1. Broadphase Collision Detection (Fast and dirty)
 	perfBroadphase.BeginTimingSection();
 	if (OcTree::isEnabled()) {
-		octree = new OcTree(new AABB(Vector3(0, 0, 0), 50));
-		OcTree::setCapacity(30);
+		OcTree::leaves.clear();
+		OcTree::draw(PhysicsEngine::GetOcTree());
+		OcTree::deleteTree(PhysicsEngine::GetOcTree());
+		octree = new OcTree(new AABB(Vector3(0, 0, 0),15));
+		OcTree::setCapacity(40);
 		for (int i = 0; i < physicsNodes.size(); i++) {
 			octree->insert(physicsNodes[i]);
 		}
@@ -148,11 +151,7 @@ void PhysicsEngine::UpdatePhysics()
 	perfNarrowphase.BeginTimingSection();
 	NarrowPhaseCollisions();
 	perfNarrowphase.EndTimingSection();
-	if (OcTree::isEnabled()) {
-		OcTree::leaves.clear();
-		//OcTree::draw(PhysicsEngine::GetOcTree());
-		OcTree::deleteTree(PhysicsEngine::GetOcTree());
-	}
+	
 	std::random_shuffle(manifolds.begin(), manifolds.end());
 	std::random_shuffle(constraints.begin(), constraints.end());
 //3. Initialize Constraint Params (precompute elasticity/baumgarte factor etc)
@@ -255,7 +254,6 @@ void PhysicsEngine::BroadPhaseCollisionsOcTree()
 
 	set<pair<PhysicsNode*, PhysicsNode*>> pairs;
 	set<pair<PhysicsNode*, PhysicsNode*>>::iterator it;
-	int c=0;
 	//	Brute force approach.
 	//  - For every object A, assume it could collide with every other object..
 	//    even if they are on the opposite sides of the world.

@@ -181,7 +181,7 @@ GameObject* CommonUtils::BuildCuboidObject(
 		pnode->SetPosition(pos);
 		pnode->SetInverseMass(inverse_mass);
 		float rad = sqrt(halfdims.x*halfdims.x + halfdims.y*halfdims.y + halfdims.z*halfdims.z);
-		pnode->SetColRadius(rad);
+		pnode->SetColRadius(rad*1.5f);
 
 		if (!collidable)
 		{
