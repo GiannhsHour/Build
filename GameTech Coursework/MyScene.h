@@ -101,7 +101,7 @@ public:
 
 		auto create_ball_cube = [&](const Vector3& offset, const Vector3& scale, float ballsize)
 		{
-			const int dims = 8;
+			const int dims = 14;
 			 
 
 			for (int x = 0; x < dims/2; ++x)
