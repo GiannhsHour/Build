@@ -177,23 +177,7 @@ public:
 		fz =  -cos(DegToRad(yaw));
 		fy =   sin(DegToRad(pitch));
 		float absp = 1 - (abs(fy));
-	/*	if (yaw < 90) {
-			fx = -(int)yaw % 90 / (float)90;
-			fz = -1 - fx;
-		}
-		else if (yaw < 180) {
-			fx = -(1 - (int)yaw % 90 / (float)90);
-			fz =  1 + fx;
-		}
-		else if (yaw < 270) {
-			fx = (int)yaw % 90 / (float)90;
-			fz = 1 - fx;
-		}
-		else  {
-			fx = 1 - (int)yaw % 90 / (float)90;
-			fz = -1 + fx;
-		}*/
-		cout << pitch <<  endl;
+
 		m_Sphere3->Physics()->SetForce(Vector3(0, -3 , 0));
 		m_Sphere3->Physics()->SetLinearVelocity((Vector3(fx * 15 , 2 + pitch * 0.5, fz * 15 )));
 		m_Sphere3->Physics()->SetAngularVelocity((Vector3(-5, 0, 0)));

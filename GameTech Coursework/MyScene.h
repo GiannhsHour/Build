@@ -29,17 +29,6 @@ public:
 	{   
 		PhysicsEngine::Instance()->SetPaused(true);
 
-		GameObject* ground = CommonUtils::BuildCuboidObject(
-			"Ground",
-			Vector3(0.0f, 0.0f, 0.0f),
-			Vector3(20.0f, 1.0f, 20.0f),
-			false,
-			0.0f,
-			false,
-			false,
-			Vector4(0.2f, 0.5f, 1.0f, 1.0f));
-
-		this->AddGameObject(ground);
 
 		{
 			 // create pool
@@ -60,7 +49,7 @@ public:
 				0.0f,									//Infinite Mass
 				true,									//Has Collision Shape
 				false,									//Dragable by the user
-				CommonUtils::GenColor(0.5f, 1.0f)));	//Color
+				CommonUtils::GenColor(0.5f, 0.5f)));	//Color
 			GameObject* c2 = this->FindGameObject("c2");
 			c2->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 0.0f, 1.0f), 90.0f));
 
@@ -72,7 +61,7 @@ public:
 				0.0f,									//Infinite Mass
 				true,									//Has Collision Shape
 				false,									//Dragable by the user
-				CommonUtils::GenColor(0.1f, 1.0f)));	//Color
+				CommonUtils::GenColor(0.1f, 0.5f)));	//Color
 			GameObject* c3 = this->FindGameObject("c3");
 			c3->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 0.0f, 1.0f), 90.0f));
 
@@ -83,7 +72,7 @@ public:
 				0.0f,									//Infinite Mass
 				true,									//Has Collision Shape
 				false,									//Dragable by the user
-				CommonUtils::GenColor(0.7f, 1.0f)));	//Color
+				CommonUtils::GenColor(0.7f, 0.5f)));	//Color
 			GameObject* c4 = this->FindGameObject("c4");
 			c4->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
 
@@ -94,7 +83,7 @@ public:
 				0.0f,									//Infinite Mass
 				true,									//Has Collision Shape
 				false,									//Dragable by the user
-				CommonUtils::GenColor(0.9f, 1.0f)));	//Color
+				CommonUtils::GenColor(0.9f, 0.5f)));	//Color
 			GameObject* c5 = this->FindGameObject("c5");
 			c5->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
 		}

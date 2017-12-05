@@ -35,5 +35,11 @@
     <ClInclude Include="MyScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyScene2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TargetScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

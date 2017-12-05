@@ -141,6 +141,8 @@
   <ItemGroup>
     <ClInclude Include="EmptyScene.h" />
     <ClInclude Include="MyScene.h" />
+    <ClInclude Include="MyScene2.h" />
+    <ClInclude Include="TargetScene.h" />
     <ClInclude Include="TestScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

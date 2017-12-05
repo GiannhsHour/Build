@@ -8,6 +8,8 @@
 #include "TestScene.h"
 #include "EmptyScene.h"
 #include "MyScene.h"
+#include "MyScene2.h"
+#include "TargetScene.h"
 
 const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 const Vector4 status_colour_header = Vector4(0.8f, 0.9f, 1.0f, 1.0f);
@@ -53,10 +55,12 @@ void Initialize()
 	PhysicsEngine::Instance();
 
 	//Enqueue All Scenes
-	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #2 - Peace and quiet"));
+	SceneManager::Instance()->EnqueueScene(new TargetScene("Targets Scene"));
+	SceneManager::Instance()->EnqueueScene(new MyScene2("CourseWork Scene 2"));
 	SceneManager::Instance()->EnqueueScene(new MyScene("CourseWork Scene"));
 	SceneManager::Instance()->EnqueueScene(new TestScene("GameTech #1 - Framework Sandbox!"));
-	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #3 - More peace and quiet"));
+	/*SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #2 - Peace and quiet"));
+	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #3 - More peace and quiet"));*/
 	
 }
 
