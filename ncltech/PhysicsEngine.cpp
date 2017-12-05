@@ -131,7 +131,7 @@ void PhysicsEngine::UpdatePhysics()
 	perfBroadphase.BeginTimingSection();
 	if (OcTree::isEnabled()) {
 		octree = new OcTree(new AABB(Vector3(0, 0, 0), 50));
-		OcTree::setCapacity(25);
+		OcTree::setCapacity(30);
 		for (int i = 0; i < physicsNodes.size(); i++) {
 			octree->insert(physicsNodes[i]);
 		}
@@ -150,7 +150,7 @@ void PhysicsEngine::UpdatePhysics()
 	perfNarrowphase.EndTimingSection();
 	if (OcTree::isEnabled()) {
 		OcTree::leaves.clear();
-		OcTree::draw(PhysicsEngine::GetOcTree());
+		//OcTree::draw(PhysicsEngine::GetOcTree());
 		OcTree::deleteTree(PhysicsEngine::GetOcTree());
 	}
 	std::random_shuffle(manifolds.begin(), manifolds.end());
@@ -161,8 +161,6 @@ void PhysicsEngine::UpdatePhysics()
 	// before they are updated loop below.
 	for (Manifold * m : manifolds) m -> PreSolverStep(updateTimestep);
 	for (Constraint* c : constraints) c -> PreSolverStep(updateTimestep);
-	
-
 	
 
 
@@ -232,12 +230,12 @@ void PhysicsEngine::BroadPhaseCollisions()
 				if (pnodeA->GetCollisionShape() != NULL
 					&& pnodeB->GetCollisionShape() != NULL)
 				{   
-				//	if (SphereSphereInterface(pnodeA, pnodeB, pnodeA->GetCollisionShape(), pnodeB->GetCollisionShape())) {
+					if (SphereSphereInterface(pnodeA, pnodeB, pnodeA->GetCollisionShape(), pnodeB->GetCollisionShape())) {
 						CollisionPair cp;
 						cp.pObjectA = pnodeA;
 						cp.pObjectB = pnodeB;
 						broadphaseColPairs.push_back(cp);
-			//		}
+					}
 				}
 
 			}
@@ -274,16 +272,26 @@ void PhysicsEngine::BroadPhaseCollisionsOcTree()
 					if (pnodeA->GetCollisionShape() != NULL
 						&& pnodeB->GetCollisionShape() != NULL)
 					{
-							
-						if (SphereSphereInterface(pnodeA, pnodeB, pnodeA->GetCollisionShape(), pnodeB->GetCollisionShape())) {
-							CollisionPair cp;
-							cp.pObjectA = pnodeA;
-							cp.pObjectB = pnodeB;
-							broadphaseColPairs.push_back(cp);
-						}
+						pair<PhysicsNode*, PhysicsNode*> p;
+						if (pnodeA > pnodeB)
+							p = make_pair(pnodeA, pnodeB);
+						else
+							p = make_pair(pnodeB, pnodeA);
+						pairs.insert(p);
 					}
 			}
 		}
+	}
+
+	for (set<pair <PhysicsNode*, PhysicsNode*>>::iterator it = pairs.begin(); it != pairs.end(); ++it) {
+		
+			if (SphereSphereInterface((*it).first, (*it).second, (*it).first->GetCollisionShape(), (*it).second->GetCollisionShape())) {
+				CollisionPair cp;
+				cp.pObjectA = (*it).first;
+				cp.pObjectB = (*it).second;
+				broadphaseColPairs.push_back(cp);
+			}
+		
 	}
 
 
