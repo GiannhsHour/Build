@@ -67,12 +67,11 @@ public:
 						col);// Render color
 					this->AddGameObject(sphere);
 					objects[x].push_back(sphere);
-
 				}
 			}
 		};
-		create_ball_cloth(floor_pos + Vector3(0, 5, -5.5f), Vector3(0.5f, 0.5f, 0.5f), 0.06f);
-		basket = AABB(floor_pos + Vector3(0, 5, -5.5f), 2.0f);
+		create_ball_cloth(floor_pos + Vector3(0, 5, -5.5f), Vector3(0.5f, 0.5f, 0.5f), 0.05f);
+		basket = AABB(floor_pos + Vector3(0, 4.5, -5.5f), 0.1f);
 
 		for (int i = 0; i < dimsx; i++) {
 			for (int j = 0; j < dimsz; j++) {
@@ -145,7 +144,7 @@ public:
 			CommonUtils::GenColor(0.7f, 0.5f)));	//Color
 		GameObject* c2 = this->FindGameObject("c2");
 		c2->Physics()->SetFriction(1.0f);
-		c2->Physics()->SetElasticity(1.0f);
+		c2->Physics()->SetElasticity(0.8f);
 		c2->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
 
 	}
@@ -184,8 +183,6 @@ public:
 		float fx, fz, fy;
 		fx = -sin(DegToRad(yaw));
 		fz = -cos(DegToRad(yaw));
-		//fy = sin(DegToRad(pitch));
-		//float absp = 1 - (abs(fy));
 
 		Vector4 col = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
 		GameObject* sphere = CommonUtils::BuildSphereObject(
@@ -197,9 +194,9 @@ public:
 			true,				// Physically Collidable (has collision shape)
 			false,				// Dragable by user?
 			col);// Render color
-		sphere->Physics()->SetLinearVelocity((Vector3(fx * 14, 5 + pitch * 0.6, fz * 14)));
+		sphere->Physics()->SetLinearVelocity((Vector3(fx * 16, 5 + pitch * 0.6, fz * 16)));
 		sphere->Physics()->SetAngularVelocity((Vector3(-4, 0, 0)));
-		sphere->Physics()->SetElasticity(0.5f);
+		sphere->Physics()->SetElasticity(0.4f);
 		this->AddGameObject(sphere);
 		basketballs.push_back(sphere->Physics());
 	}
@@ -247,7 +244,7 @@ public:
 	{
 		Scene::OnUpdateScene(dt);
 		draw();
-		drawBasket();
+	//	drawBasket();
 		checkBasketballs();
 
 		//Update Rotating Objects!

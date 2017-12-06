@@ -219,7 +219,7 @@ void PhysicsEngine::BroadPhaseCollisions()
 	if (physicsNodes.size() > 0)
 	{ 
 		for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
-		{
+		{   
 			for (size_t j = i + 1; j < physicsNodes.size(); ++j)
 			{
 				pnodeA = physicsNodes[i];
