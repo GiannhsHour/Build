@@ -224,6 +224,7 @@ void PhysicsEngine::BroadPhaseCollisions()
 			{
 				pnodeA = physicsNodes[i];
 				pnodeB = physicsNodes[j];
+				if (pnodeA->isSoft() && pnodeB->isSoft()) continue;
 
 				//Check they both atleast have collision shapes
 				if (pnodeA->GetCollisionShape() != NULL

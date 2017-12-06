@@ -70,6 +70,7 @@ public:
 		, collisionShape(NULL)
 		, friction(0.5f)
 		, elasticity(0.9f)
+		, soft(false)
 	{
 	}
 
@@ -110,6 +111,7 @@ public:
 
 
 	inline float				GetColRadius()				const { return colRadius; }
+	inline bool					isSoft()				const { return soft; }
 
 
 	//<--------- SETTERS ------------->
@@ -128,6 +130,8 @@ public:
 	inline void SetAngularVelocity(const Vector3& v)				{ angVelocity = v; }
 	inline void SetTorque(const Vector3& v)							{ torque = v; }
 	inline void SetInverseInertia(const Matrix3& v)					{ invInertia = v; }
+
+	inline void SetIsSoft(bool s) { soft = s; }
 
 	inline void SetCollisionShape(CollisionShape* colShape)
 	{ 
@@ -161,6 +165,7 @@ public:
 
 protected:
 	float colRadius;
+	bool soft;
 
 	//Useful parameters
 	GameObject*				parent;
