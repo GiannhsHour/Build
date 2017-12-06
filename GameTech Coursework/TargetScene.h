@@ -30,6 +30,7 @@ public:
 
 	void drawBasket();
 	
+	void drawScore(float time);
 
 	int total_score;
 	virtual void OnUpdateScene(float dt) override;
@@ -37,6 +38,9 @@ public:
 	private:
 		std::vector<std::vector<GameObject*>> objects;
 		std::vector<PhysicsNode*> basketballs;
+		std::vector<float> scores;
 		AABB basket;
+		;
+		float acum_time;
 
 };
