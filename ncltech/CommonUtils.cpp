@@ -153,6 +153,43 @@ GameObject* CommonUtils::BuildSphereObject(
 	return obj;
 }
 
+GameObject* CommonUtils::BuildNonRenderObject(
+	const std::string& name,
+	const Vector3& pos,
+	float radius,
+	bool physics_enabled,
+	float inverse_mass,
+	bool collidable,
+	bool dragable,
+	const Vector4& color)
+{
+
+	PhysicsNode* pnode = NULL;
+	if (physics_enabled)
+	{
+		pnode = new PhysicsNode();
+		pnode->SetPosition(pos);
+		pnode->SetInverseMass(inverse_mass);
+		pnode->SetColRadius(radius);
+
+		if (!collidable)
+		{
+			//Even without a collision shape, the inertia matrix for rotation has to be derived from the objects shape
+			pnode->SetInverseInertia(SphereCollisionShape(radius).BuildInverseInertia(inverse_mass));
+		}
+		else
+		{
+			CollisionShape* pColshape = new SphereCollisionShape(radius);
+			pnode->SetCollisionShape(pColshape);
+			pnode->SetInverseInertia(pColshape->BuildInverseInertia(inverse_mass));
+		}
+	}
+
+	GameObject* obj = new GameObject(name, NULL, pnode);
+
+	return obj;
+}
+
 GameObject* CommonUtils::BuildCuboidObject(
 	const std::string& name,
 	const Vector3& pos,
