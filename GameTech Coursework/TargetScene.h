@@ -28,7 +28,6 @@ public:
 	virtual void OnInitializeScene() override
 	{
 
-		PhysicsEngine::Instance()->SetGravity(Vector3(0.0f, -10.0f, 0.0f));		//No Gravity!
 		PhysicsEngine::Instance()->SetDampingFactor(1.0f);						//No Damping!
 
 		for (int i = 0; i < objects.size(); i++) {
@@ -36,62 +35,6 @@ public:
 		}
 		objects.clear();
 
-		{
-			// create targets
-			this->AddGameObject(CommonUtils::BuildCuboidObject("c1",
-				floor_pos,	//Position leading to 0.25 meter overlap on faces, and more on diagonals
-				Vector3(5.0f, 0.2f, 7.0f),				//Half dimensions
-				true,									//Has Physics Object
-				0.0f,									//Infinite Mass
-				true,									//Has Collision Shape
-				false,									//Dragable by the user
-				CommonUtils::GenColor(0.3f, 0.5f)));	//Color
-
-			this->AddGameObject(CommonUtils::BuildCuboidObject("c2",
-				floor_pos + Vector3(0, 5, -7),								//Position
-				Vector3(2.0f, 0.2f, 2.0f),				//Half dimensions
-				true,									//Has Physics Object
-				0.0f,									//Infinite Mass
-				true,									//Has Collision Shape
-				false,									//Dragable by the user
-				CommonUtils::GenColor(0.7f, 0.5f)));	//Color
-			GameObject* c2 = this->FindGameObject("c2");
-			c2->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
-
-			//this->AddGameObject(CommonUtils::BuildCuboidObject("c3",
-			//	floor_pos + Vector3(0, 5, -4.5),								//Position
-			//	Vector3(1.0f, 0.1f, 1.0f),				//Half dimensions
-			//	true,									//Has Physics Object
-			//	0.0f,									//Infinite Mass
-			//	true,									//Has Collision Shape
-			//	false,									//Dragable by the user
-			//	CommonUtils::GenColor(0.7f, 0.5f)));	//Color
-			//GameObject* c3 = this->FindGameObject("c3");
-			//c3->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
-
-			//this->AddGameObject(CommonUtils::BuildCuboidObject("c4",
-			//	floor_pos + Vector3(-1.15, 5, -5.5),								//Position
-			//	Vector3(1.0f, 0.1f, 1.0f),				//Half dimensions
-			//	true,									//Has Physics Object
-			//	0.0f,									//Infinite Mass
-			//	true,									//Has Collision Shape
-			//	false,									//Dragable by the user
-			//	CommonUtils::GenColor(0.7f, 0.5f)));	//Color
-			//GameObject* c4 = this->FindGameObject("c4");
-			//c4->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 0.0f, 1.0f), 90.0f));
-
-			//this->AddGameObject(CommonUtils::BuildCuboidObject("c5",
-			//	floor_pos + Vector3(1.15, 5, -5.5),								//Position
-			//	Vector3(1.0f, 0.1f, 1.0f),				//Half dimensions
-			//	true,									//Has Physics Object
-			//	0.0f,									//Infinite Mass
-			//	true,									//Has Collision Shape
-			//	false,									//Dragable by the user
-			//	CommonUtils::GenColor(0.7f, 0.5f)));	//Color
-			//GameObject* c5 = this->FindGameObject("c5");
-			//c5->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 0.0f, 1.0f), 90.0f));
-
-		}
 
 
 		const int dims = 30;
@@ -112,7 +55,7 @@ public:
 					else m = 150.0f;
 					Vector4 col = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
 					//	Vector3 pos = offset + Vector3(scale.x * x * 0.5, 0.0f, scale.z * z * 0.5);
-					Vector3 pos = offset + Vector3(cos(rad*4.5f), -scale.y * z * 0.5, sin(rad*4.5f));
+					Vector3 pos = offset + Vector3(cos(rad*4.5f), -scale.y * z * 0.6, sin(rad*4.5f));
 					GameObject* sphere = CommonUtils::BuildNonRenderObject(
 						"",					// Optional: Name
 						pos,				// Position
@@ -128,7 +71,8 @@ public:
 				}
 			}
 		};
-		create_ball_cloth(floor_pos + Vector3(0, 5, -5), Vector3(0.5f, 0.5f, 0.5f), 0.04f);
+		create_ball_cloth(floor_pos + Vector3(0, 5, -5.5f), Vector3(0.5f, 0.5f, 0.5f), 0.06f);
+		basket = AABB(floor_pos + Vector3(0, 5, -5.5f), 2.0f);
 
 		for (int i = 0; i < dimsx; i++) {
 			for (int j = 0; j < dimsz; j++) {
@@ -171,6 +115,38 @@ public:
 				}
 			}
 		}
+
+		for (int i = 0; i < dimsz; i++) {
+			DistanceConstraint* constraint = new DistanceConstraint(
+				objects[0][i]->Physics(),					//Physics Object A
+				objects[dimsz-1][i]->Physics(),					//Physics Object B
+				objects[0][i]->Physics()->GetPosition(),	//Attachment Position on Object A	-> Currently the centre
+				objects[dimsz-1][i]->Physics()->GetPosition());	//Attachment Position on Object B	-> Currently the centre  
+			PhysicsEngine::Instance()->AddConstraint(constraint);
+		}
+
+		// create targets
+		this->AddGameObject(CommonUtils::BuildCuboidObject("c1",
+			floor_pos,	//Position leading to 0.25 meter overlap on faces, and more on diagonals
+			Vector3(5.0f, 0.2f, 7.0f),				//Half dimensions
+			true,									//Has Physics Object
+			0.0f,									//Infinite Mass
+			true,									//Has Collision Shape
+			false,									//Dragable by the user
+			CommonUtils::GenColor(0.3f, 0.5f)));	//Color
+
+		this->AddGameObject(CommonUtils::BuildCuboidObject("c2",
+			floor_pos + Vector3(0, 5, -7),								//Position
+			Vector3(3.0f, 0.2f, 2.5f),				//Half dimensions
+			true,									//Has Physics Object
+			0.0f,									//Infinite Mass
+			true,									//Has Collision Shape
+			false,									//Dragable by the user
+			CommonUtils::GenColor(0.7f, 0.5f)));	//Color
+		GameObject* c2 = this->FindGameObject("c2");
+		c2->Physics()->SetFriction(1.0f);
+		c2->Physics()->SetElasticity(1.0f);
+		c2->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
 
 	}
 
@@ -221,17 +197,58 @@ public:
 			true,				// Physically Collidable (has collision shape)
 			false,				// Dragable by user?
 			col);// Render color
-		sphere->Physics()->SetLinearVelocity((Vector3(fx * 15, 2 + pitch * 0.5, fz * 15)));
-		sphere->Physics()->SetAngularVelocity((Vector3(-5, 0, 0)));
+		sphere->Physics()->SetLinearVelocity((Vector3(fx * 14, 5 + pitch * 0.6, fz * 14)));
+		sphere->Physics()->SetAngularVelocity((Vector3(-4, 0, 0)));
+		sphere->Physics()->SetElasticity(0.5f);
 		this->AddGameObject(sphere);
+		basketballs.push_back(sphere->Physics());
+	}
+
+	void checkBasketballs() {
+		for (int i = 0; i < basketballs.size(); i++) {
+			if (basket.containsObject(basketballs[i])) {
+				total_score += 100;
+				basketballs.erase(std::remove(basketballs.begin(), basketballs.end(), basketballs[i]), basketballs.end());
+			}
+		}
+	}
+
+	void drawBasket() {
+		float d = 2 * basket.halfdim;
+		Vector3 c1 = basket.corner1;
+		Vector3 c2 = c1 + Vector3(-d, 0, 0);
+		Vector3 c3 = c2 + Vector3(0, 0, d);
+		Vector3 c4 = c3 + Vector3(d, 0, 0);
+
+		Vector3 c5 = basket.corner2;
+		Vector3 c6 = c5 + Vector3(d, 0, 0);
+		Vector3 c7 = c6 + Vector3(0, 0, -d);
+		Vector3 c8 = c7 + Vector3(-d, 0, 0);
+
+		NCLDebug::DrawThickLine(c1, c2, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c2, c3, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c3, c4, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c1, c4, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+
+		NCLDebug::DrawThickLine(c5, c6, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c6, c7, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c7, c8, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c5, c8, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+
+		NCLDebug::DrawThickLine(c1, c7, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c4, c6, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c2, c8, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+		NCLDebug::DrawThickLine(c3, c5, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
 	}
 	
 
-	float m_AccumTime;
+	int total_score;
 	virtual void OnUpdateScene(float dt) override
 	{
 		Scene::OnUpdateScene(dt);
 		draw();
+		drawBasket();
+		checkBasketballs();
 
 		//Update Rotating Objects!
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
@@ -239,9 +256,13 @@ public:
 			spawn();
 		}
 
+		NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Score: %d", total_score);
+
 
 	}
 	private:
 		std::vector<std::vector<GameObject*>> objects;
+		std::vector<PhysicsNode*> basketballs;
+		AABB basket;
 
 };
