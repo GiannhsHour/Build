@@ -382,32 +382,32 @@ void PhysicsEngine::NarrowPhaseCollisions()
 void PhysicsEngine::DebugRender()
 {
 	// Draw all collision manifolds
-	if (debugDrawFlags & DEBUGDRAW_FLAGS_MANIFOLD)
-	{
-		for (Manifold* m : manifolds)
-		{
-			m->DebugDraw();
-		}
-	}
+	//if (debugDrawFlags & DEBUGDRAW_FLAGS_MANIFOLD)
+	//{
+	//	for (Manifold* m : manifolds)
+	//	{
+	//		m->DebugDraw();
+	//	}
+	//}
 
-	// Draw all constraints
-	if (debugDrawFlags & DEBUGDRAW_FLAGS_CONSTRAINT)
-	{
-		for (Constraint* c : constraints)
-		{
-			c->DebugDraw();
-		}
-	}
+	//// Draw all constraints
+	//if (debugDrawFlags & DEBUGDRAW_FLAGS_CONSTRAINT)
+	//{
+	//	for (Constraint* c : constraints)
+	//	{
+	//		c->DebugDraw();
+	//	}
+	//}
 
-	// Draw all associated collision shapes
-	if (debugDrawFlags & DEBUGDRAW_FLAGS_COLLISIONVOLUMES)
-	{
-		for (PhysicsNode* obj : physicsNodes)
-		{
-			if (obj->GetCollisionShape() != NULL)
-			{
-				obj->GetCollisionShape()->DebugDraw();
-			}
-		}
-	}
+	//// Draw all associated collision shapes
+	//if (debugDrawFlags & DEBUGDRAW_FLAGS_COLLISIONVOLUMES)
+	//{
+	//	for (PhysicsNode* obj : physicsNodes)
+	//	{
+	//		if (obj->GetCollisionShape() != NULL)
+	//		{
+	//			obj->GetCollisionShape()->DebugDraw();
+	//		}
+	//	}
+	//}
 }
