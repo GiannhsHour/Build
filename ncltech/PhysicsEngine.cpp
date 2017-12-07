@@ -339,12 +339,15 @@ void PhysicsEngine::NarrowPhaseCollisions()
 					NCLDebug::DrawThickLineNDT(colData._pointOnPlane, colData._pointOnPlane - colData._normal * colData._penetration, 0.05f, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
 				}
 
-				//Check to see if any of the objects have a OnCollision callback that dont want the objects to physically collide
-				bool okA = cp.pObjectA->FireOnCollisionEvent(cp.pObjectA, cp.pObjectB);
-				bool okB = cp.pObjectB->FireOnCollisionEvent(cp.pObjectB, cp.pObjectA);
 
-				if (okA && okB)
-				{
+				//bool okA = cp.pObjectA->FireOnCollisionEvent(cp.pObjectA, cp.pObjectB);
+				//bool okB = cp.pObjectB->FireOnCollisionEvent(cp.pObjectB, cp.pObjectA);
+				//Check to see if any of the objects have a OnCollision callback that dont want the objects to physically collide
+				cp.pObjectA->FireOnCollisionEvent(cp.pObjectA, cp.pObjectB);
+				cp.pObjectB->FireOnCollisionEvent(cp.pObjectB, cp.pObjectA);
+
+				//if (okA && okB)
+				//{
 					/* TUTORIAL 5 CODE */
 
 					// Build full collision manifold that will also handle the
@@ -367,7 +370,7 @@ void PhysicsEngine::NarrowPhaseCollisions()
 					}
 					else
 						delete manifold;
-				}
+				//}
 
 			}
 		}

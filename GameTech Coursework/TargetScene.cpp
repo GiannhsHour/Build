@@ -7,10 +7,11 @@
 #include <ncltech\SceneManager.h>
 #include <ncltech\CommonUtils.h>
 using namespace CommonUtils;
-
+std::map<PhysicsNode*, bool> TargetScene::col_check_map;
 void TargetScene::OnInitializeScene() 
 {   
 	scores.clear();
+	scoresTime.clear();
 	acum_time = 0;
 
 	const Vector3 floor_pos = Vector3(0, 1.5f, 0);
@@ -31,7 +32,7 @@ void TargetScene::OnInitializeScene()
 	const int dims = 30;
 	const int dimsx = dims;
 	const int dimsz = dims  * 0.25f;
-	float parts = 360.0f / (float)dimsx / 4.5f;
+	float parts = 360.0f / (float)dimsx ;
 	auto create_ball_cloth = [&](const Vector3& offset, const Vector3& scale, float ballsize)
 	{
 
@@ -41,12 +42,13 @@ void TargetScene::OnInitializeScene()
 			float rad = DegToRad(x * parts);
 			objects.push_back(std::vector<GameObject*>());
 			for (int z = 0; z < dimsz; ++z)
-			{
+			{	
+				
 				if (z == 0)  m = 0.0f;
 				else m = 150.0f;
 				Vector4 col = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
 				//	Vector3 pos = offset + Vector3(scale.x * x * 0.5, 0.0f, scale.z * z * 0.5);
-				Vector3 pos = offset + Vector3(cos(rad*4.5f), -scale.y * z * 0.6, sin(rad*4.5f));
+				Vector3 pos = offset + Vector3(cos(rad)*(1-(float)z/ (float)(dimsz + 6)), -scale.y * z * 0.6, sin(rad)*(1 - (float)z / (float)(dimsz + 6)));
 				GameObject* sphere = CommonUtils::BuildNonRenderObject(
 					"",					// Optional: Name
 					pos,				// Position
@@ -141,6 +143,7 @@ void TargetScene::OnInitializeScene()
 	c2->Physics()->SetElasticity(0.8f);
 	c2->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
 	(*c2->Render()->GetChildIteratorStart())->GetMesh()->SetTexture(boardTex);
+	c2->Physics()->SetOnCollisionCallback(&TargetScene::boardCollisionCheck);
 
 	this->AddGameObject(CommonUtils::BuildCuboidObjectNoTexture("c3",
 		floor_pos + Vector3(0, 2.5, -8.5),								//Position
@@ -178,6 +181,13 @@ void TargetScene::draw() {
 
 }
 
+
+bool TargetScene::boardCollisionCheck(PhysicsNode* self, PhysicsNode* collidingObject)
+{
+	col_check_map[collidingObject] = true;
+	return false;
+}
+
 void TargetScene::spawn() {
 	{
 
@@ -205,6 +215,7 @@ void TargetScene::spawn() {
 		(*sphere->Render()->GetChildIteratorStart())->GetMesh()->SetTexture(ballTex);
 		this->AddGameObject(sphere);
 		basketballs.push_back(sphere->Physics());
+		col_check_map[sphere->Physics()] = false;
 	}
 }
 
@@ -239,9 +250,15 @@ void TargetScene::drawBasket() {
 void TargetScene::checkBasketballs() {
 	for (int i = 0; i < basketballs.size(); i++) {
 		if (basket.containsObject(basketballs[i])) {
-			total_score += 100;
+			int score;
+			score = 100;
+			if (col_check_map[basketballs[i]]) {
+				score = 50;
+			}
+			total_score += score;
 			basketballs.erase(std::remove(basketballs.begin(), basketballs.end(), basketballs[i]), basketballs.end());
-			scores.push_back(1.5f);
+			scoresTime.push_back(1.5f);
+			scores.push_back(score);
 		}
 	}
 }
@@ -249,13 +266,16 @@ void TargetScene::checkBasketballs() {
 
 
 void TargetScene::drawScore(float time) {
-	for(int i = 0; i< scores.size(); i++){
-		if (scores[i] > 0) {
+	for(int i = 0; i< scoresTime.size(); i++){
+		if (scoresTime[i] > 0) {
 			Vector4 textPos = Vector4(0.0f, 0.5f, -0.0f, 1.0f);
-			NCLDebug::DrawTextCs(textPos + Vector4(0.0f , - scores[i] *0.2, 0.0f, 1.0f) , 45, "+100", TEXTALIGN_LEFT, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
-			scores[i] -= time;
+			NCLDebug::DrawTextCs(textPos + Vector4(0.0f , -scoresTime[i] *0.2, 0.0f, 1.0f) , 45, std::to_string(scores[i]), TEXTALIGN_LEFT, scores[i] == 100 ? Vector4(0.0f, 1.0f, 0.0f, 1.0f) : Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+			scoresTime[i] -= time;
 		}
-		else scores.erase(std::remove(scores.begin(), scores.end(), scores[i]), scores.end());
+		else {
+			scoresTime.erase(std::remove(scoresTime.begin(), scoresTime.end(), scoresTime[i]), scoresTime.end());
+			scores.erase(std::remove(scores.begin(), scores.end(), scores[i]), scores.end());
+		}
 		
 	}
 }
@@ -270,7 +290,7 @@ void TargetScene::OnUpdateScene(float dt) {
 		//	drawBasket();
 		checkBasketballs();
 		drawScore(dt);
-		
+		NCLDebug::DrawTextCs(Vector4(0.0f, 0.0f, 0.0f, 1.0f), 20, "O", TEXTALIGN_CENTRE, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 
 		//Update Rotating Objects!
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))

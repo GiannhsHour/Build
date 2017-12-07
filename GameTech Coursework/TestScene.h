@@ -13,6 +13,7 @@ public:
 	virtual void OnUpdateScene(float dt) override;
 
 protected:
+	bool ExampleCallbackFunction1();
 	float m_AccumTime;
 	GameObject* m_pPlayer;
 };
