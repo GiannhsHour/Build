@@ -177,9 +177,10 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 			{
 				NCLDebug::Log(status_color3, "Network: Successfully connected to server!");
 
-				//Send a 'hello' packet
-				char* text_data = "Hellooo!";
-				ENetPacket* packet = enet_packet_create(text_data, strlen(text_data) + 1, 0);
+				int maze_size = 5;
+				float density = 2.5f;
+				std::pair<int, float> p = std::make_pair<>(maze_size, density);
+				ENetPacket* packet = enet_packet_create(&p, sizeof(pair<int,float>), 0);
 				enet_peer_send(serverConnection, 0, packet);
 			}	
 		}

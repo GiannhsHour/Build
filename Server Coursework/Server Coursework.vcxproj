@@ -84,6 +84,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MazeGenerator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="HungryDinosaur.h" />
+    <ClInclude Include="MazeGenerator.h" />
+    <ClInclude Include="SearchAlgorithm.h" />
+    <ClInclude Include="SearchAStar.h" />
+    <ClInclude Include="SearchBreadthFirst.h" />
+    <ClInclude Include="SearchDepthFirst.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

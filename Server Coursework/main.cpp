@@ -39,6 +39,7 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 #include <nclgl\Vector3.h>
 #include <nclgl\common.h>
 #include <ncltech\NetworkBase.h>
+#include "MazeGenerator.h"
 
 //Needed to get computer adapter IPv4 addresses via windows
 #include <iphlpapi.h>
@@ -52,7 +53,7 @@ NetworkBase server;
 GameTimer timer;
 float accum_time = 0.0f;
 float rotation = 0.0f;
-
+MazeGenerator*	generator;
 
 void Win32_PrintAllAdapterIPAddresses();
 
@@ -65,6 +66,7 @@ int onExit(int exitcode)
 
 int main(int arcg, char** argv)
 {
+	
 	if (enet_initialize() != 0)
 	{
 		fprintf(stderr, "An error occurred while initializing ENet.\n");
@@ -96,11 +98,22 @@ int main(int arcg, char** argv)
 			switch (evnt.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT:
-				printf("- New Client Connected\n");
+				printf("-%d Client Connected\n", evnt.peer->incomingPeerID);
 				break;
 
 			case ENET_EVENT_TYPE_RECEIVE:
-				printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, evnt.packet->data);
+				printf("\t Received data from client %d \n", evnt.peer->incomingPeerID);
+				if (evnt.packet->dataLength == sizeof(std::pair<int,float>))
+				{
+					std::pair<int, float> p;
+					memcpy(&p, evnt.packet->data, sizeof(std::pair<int,float>));
+					printf("\t Received size: %d and density %f", p.first, p.second);
+				}
+				else
+				{   
+					NCLERROR("Size of package received: %d", evnt.packet->dataLength);
+					NCLERROR("Recieved Invalid Network Packet!");
+				}
 				enet_packet_destroy(evnt.packet);
 				break;
 
