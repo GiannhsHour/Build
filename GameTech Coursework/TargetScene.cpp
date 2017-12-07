@@ -22,7 +22,11 @@ void TargetScene::OnInitializeScene()
 	}
 	objects.clear();
 
-	ballTex = SOIL_load_OGL_texture(TEXTUREDIR"basketball.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	ballTex = SOIL_load_OGL_texture(TEXTUREDIR"basketball.PNG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	courtTex = SOIL_load_OGL_texture(TEXTUREDIR"wood.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	ironTex = SOIL_load_OGL_texture(TEXTUREDIR"iron.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	// texture from http://naveensabesan.blogspot.co.uk/2012/08/cosco.html
+	boardTex = SOIL_load_OGL_texture(TEXTUREDIR"board.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
 
 	const int dims = 30;
 	const int dimsx = dims;
@@ -113,29 +117,32 @@ void TargetScene::OnInitializeScene()
 	}
 
 	
-	this->AddGameObject(CommonUtils::BuildCuboidObject("c1",
+	this->AddGameObject(CommonUtils::BuildCuboidObjectNoTexture("c1",
 		floor_pos,	//Position leading to 0.25 meter overlap on faces, and more on diagonals
 		Vector3(5.0f, 0.2f, 7.0f),				//Half dimensions
 		true,									//Has Physics Object
 		0.0f,									//Infinite Mass
 		true,									//Has Collision Shape
 		false,									//Dragable by the user
-		Vector4(0.8f, 0.4f, 0.1f, 1.0f)));	//Color
+		Vector4(1.0f, 1.0f, 1.0f, 1.0f)));	//Color
+	GameObject* c1 = this->FindGameObject("c1");
+	(*c1->Render()->GetChildIteratorStart())->GetMesh()->SetTexture(courtTex);
 
-	this->AddGameObject(CommonUtils::BuildCuboidObject("c2",
+	this->AddGameObject(CommonUtils::BuildCuboidObjectNoTexture("c2",
 		floor_pos + Vector3(0, 5, -7),								//Position
 		Vector3(3.0f, 0.2f, 2.5f),				//Half dimensions
 		true,									//Has Physics Object
 		0.0f,									//Infinite Mass
 		true,									//Has Collision Shape
 		false,									//Dragable by the user
-		Vector4(0.8f, 0.8f, 0.8f, 0.3f)));	//Color
+		Vector4(1.0f, 1.0f, 1.0f, 1.0f)));	//Color
 	GameObject* c2 = this->FindGameObject("c2");
 	c2->Physics()->SetFriction(1.0f);
 	c2->Physics()->SetElasticity(0.8f);
 	c2->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
+	(*c2->Render()->GetChildIteratorStart())->GetMesh()->SetTexture(boardTex);
 
-	this->AddGameObject(CommonUtils::BuildCuboidObject("c3",
+	this->AddGameObject(CommonUtils::BuildCuboidObjectNoTexture("c3",
 		floor_pos + Vector3(0, 2.5, -8.5),								//Position
 		Vector3(0.7f, 0.7f, 3.0f),				//Half dimensions
 		true,									//Has Physics Object
@@ -145,7 +152,7 @@ void TargetScene::OnInitializeScene()
 		Vector4(0.1f, 0.8f, 0.1f, 1.0f)));	//Color
 	GameObject* c3 = this->FindGameObject("c3");
 	c3->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), 90.0f));
-
+	(*c3->Render()->GetChildIteratorStart())->GetMesh()->SetTexture(ironTex);
 
 }
 

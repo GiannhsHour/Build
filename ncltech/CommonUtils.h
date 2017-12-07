@@ -53,6 +53,16 @@ namespace CommonUtils
 		bool dragable = true,
 		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
+	GameObject* BuildCuboidObjectNoTexture(
+		const std::string& name,
+		const Vector3& pos,
+		const Vector3& halfdims,
+		bool physics_enabled = false,
+		float inverse_mass = 0.0f,			//requires physics_enabled = true
+		bool collidable = true,				//requires physics_enabled = true
+		bool dragable = true,
+		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+	
 	//For soft objects
 	GameObject* BuildNonRenderObject(
 		const std::string& name,
