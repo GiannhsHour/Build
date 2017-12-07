@@ -40,7 +40,7 @@ public:
 		std::vector<PhysicsNode*> basketballs;
 		std::vector<float> scores;
 		AABB basket;
-		;
+		GLuint ballTex;
 		float acum_time;
 
 };

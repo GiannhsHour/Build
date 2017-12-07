@@ -22,7 +22,7 @@ void TargetScene::OnInitializeScene()
 	}
 	objects.clear();
 
-
+	ballTex = SOIL_load_OGL_texture(TEXTUREDIR"basketball.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
 
 	const int dims = 30;
 	const int dimsx = dims;
@@ -182,7 +182,7 @@ void TargetScene::spawn() {
 		fx = -sin(DegToRad(yaw));
 		fz = -cos(DegToRad(yaw));
 
-		Vector4 col = Vector4(1.0f, 0.2f, 0.0f, 1.0f);
+		Vector4 col = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 		GameObject* sphere = CommonUtils::BuildSphereObject(
 			"",					// Optional: Name
 			camera->GetPosition(),				// Position
@@ -195,6 +195,7 @@ void TargetScene::spawn() {
 		sphere->Physics()->SetLinearVelocity((Vector3(fx * 16, 5 + pitch * 0.6, fz * 16)));
 		sphere->Physics()->SetAngularVelocity((Vector3(-4*fx, 0, 4*fz)));
 		sphere->Physics()->SetElasticity(0.4f);
+		(*sphere->Render()->GetChildIteratorStart())->GetMesh()->SetTexture(ballTex);
 		this->AddGameObject(sphere);
 		basketballs.push_back(sphere->Physics());
 	}
