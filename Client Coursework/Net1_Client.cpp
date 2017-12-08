@@ -86,6 +86,7 @@ produce satisfactory results on the networked peers.
 #include <nclgl\NCLDebug.h>
 #include <ncltech\DistanceConstraint.h>
 #include <ncltech\CommonUtils.h>
+#include "MazeRenderer.h"
 
 const Vector3 status_color3 = Vector3(1.0f, 0.6f, 0.6f);
 const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_color3.z, 1.0f);
@@ -110,16 +111,7 @@ void Net1_Client::OnInitializeScene()
 	}
 
 	//Generate Simple Scene with a box that can be updated upon recieving server packets
-	box = CommonUtils::BuildCuboidObject(
-		"Server",
-		Vector3(0.0f, 1.0f, 0.0f),
-		Vector3(0.5f, 0.5f, 0.5f),
-		true,									//Physics Enabled here Purely to make setting position easier via Physics()->SetPosition()
-		0.0f,
-		false,
-		false,
-		Vector4(0.2f, 0.5f, 1.0f, 1.0f));
-	this->AddGameObject(box);
+
 }
 
 void Net1_Client::OnCleanupScene()
@@ -157,8 +149,8 @@ void Net1_Client::OnUpdateScene(float dt)
 	uint8_t ip3 = (serverConnection->address.host >> 16) & 0xFF;
 	uint8_t ip4 = (serverConnection->address.host >> 24) & 0xFF;
 
-	NCLDebug::DrawTextWs(box->Physics()->GetPosition() + Vector3(0.f, 0.6f, 0.f), STATUS_TEXT_SIZE, TEXTALIGN_CENTRE, Vector4(0.f, 0.f, 0.f, 1.f),
-		"Peer: %u.%u.%u.%u:%u", ip1, ip2, ip3, ip4, serverConnection->address.port);
+	//NCLDebug::DrawTextWs(box->Physics()->GetPosition() + Vector3(0.f, 0.6f, 0.f), STATUS_TEXT_SIZE, TEXTALIGN_CENTRE, Vector4(0.f, 0.f, 0.f, 1.f),
+		//"Peer: %u.%u.%u.%u:%u", ip1, ip2, ip3, ip4, serverConnection->address.port);
 
 	
 	NCLDebug::AddStatusEntry(status_color, "Network Traffic");
@@ -177,8 +169,8 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 			{
 				NCLDebug::Log(status_color3, "Network: Successfully connected to server!");
 
-				int maze_size = 5;
-				float density = 2.5f;
+				int maze_size = 6;
+				float density = 0.4f;
 				std::pair<int, float> p = std::make_pair<>(maze_size, density);
 				ENetPacket* packet = enet_packet_create(&p, sizeof(pair<int,float>), 0);
 				enet_peer_send(serverConnection, 0, packet);
@@ -189,16 +181,38 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 
 	//Server has sent us a new packet
 	case ENET_EVENT_TYPE_RECEIVE:
-		{
-			if (evnt.packet->dataLength == sizeof(Vector3))
+		{   
+		
+			if (evnt.packet->dataLength == sizeof(std::pair<int,float>))
 			{
-				Vector3 pos;
-				memcpy(&pos, evnt.packet->data, sizeof(Vector3));
-				box->Physics()->SetPosition(pos);
+				std::pair<int, float> p;
+				memcpy(&p, evnt.packet->data, sizeof(std::pair<int, float>));
+				maze_size = p.first;
+				maze_density = p.second;
+				char* response = "OK";
+				ENetPacket* packet = enet_packet_create(response, sizeof(char)*2, 0);
+				cout << "Sending size: "<< packet->dataLength << endl;
+				enet_peer_send(serverConnection, 0, packet);
+			}
+
+			else if (evnt.packet->dataLength == 6 * 5 * 2) {
+				int maze_edges = maze_size*(maze_size - 1) * 2;
+				bool * walls = new bool[maze_edges];
+				
+				memcpy(walls, evnt.packet->data, maze_edges);
+				
+				for (int i = 0; i < maze_edges; i++) {
+					cout << walls[i] << endl;
+				}
+
+				MazeRenderer * maze = new MazeRenderer(walls, maze_size);
+				cout << maze << endl;
+				this->AddGameObject(maze);
 			}
 			else
-			{
+			{   	
 				NCLERROR("Recieved Invalid Network Packet!");
+				std::cout << "Length: " << evnt.packet->dataLength << endl;
 			}
 
 		}

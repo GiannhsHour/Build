@@ -20,7 +20,8 @@ public:
 
 protected:
 	GameObject* box;
-
+	int maze_size = 0;
+	float maze_density = 0.0f;
 	NetworkBase network;
 	ENetPeer*	serverConnection;
 };

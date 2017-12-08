@@ -3,7 +3,25 @@
 
 const Vector4 wall_color = Vector4(1.f, 0.8f, 0.3f, 1);
 
+MazeRenderer::MazeRenderer(bool* wls, int ms, Mesh* wallmesh) : GameObject("")
+, mesh(wallmesh)
+, walls(wls)
+, maze_size(ms)
+, flat_maze(NULL) {
+	this->SetRender(new RenderNode());
 
+	if (walls)
+	{
+		uint num_walls = Generate_FlatMaze();
+
+		wall_descriptors.reserve(num_walls);
+
+		Generate_ConstructWalls();
+
+		Generate_BuildRenderNodes();
+	}
+
+}
 
 MazeRenderer::MazeRenderer(MazeGenerator* gen, Mesh* wallmesh)
 	: GameObject("")
@@ -69,9 +87,12 @@ uint MazeRenderer::Generate_FlatMaze()
 	//Generates a 3xsize by 3xsize array of booleans, where 
 	// a true value corresponds to a solid wall and false to open space.
 	// - Each GraphNode is a 2x2 open space with a 1 pixel wall around it.
-	uint size = maze->GetSize();
-	GraphEdge* allEdges = maze->allEdges;
-
+	uint size = maze_size;
+	num_edges = maze_size*(maze_size - 1) * 2;
+	GraphEdge* allEdges = new GraphEdge[num_edges];
+	for (int i = 0; i < num_edges; i++) {
+		allEdges[i]._iswall = walls[i];
+	}
 	flat_maze_size = size * 3 - 1;
 
 	if (flat_maze) delete[] flat_maze;
@@ -241,7 +262,7 @@ void MazeRenderer::Generate_BuildRenderNodes()
 
 
 //Finally - our start/end goals
-	GraphNode* start = maze->GetStartNode();
+	/*GraphNode* start = maze->GetStartNode();
 	GraphNode* end = maze->GetGoalNode();
 
 	Vector3 cellpos = Vector3(
@@ -266,7 +287,7 @@ void MazeRenderer::Generate_BuildRenderNodes()
 	) * scalar;
 	cube = new RenderNode(mesh, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 	cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
-	root->AddChild(cube);
+	root->AddChild(cube);*/
 
 	this->SetRender(root);
 }

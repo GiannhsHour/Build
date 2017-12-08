@@ -21,6 +21,7 @@ class MazeRenderer : public GameObject
 {
 public:
 	MazeRenderer(MazeGenerator* gen, Mesh* wallmesh = CommonMeshes::Cube());
+	MazeRenderer(bool* walls,  int ms, Mesh* wallmesh = CommonMeshes::Cube());
 	virtual ~MazeRenderer();
 
 	//The search history draws from edges because they already store the 'to'
@@ -44,6 +45,11 @@ protected:
 
 protected:
 	MazeGenerator*	maze;
+
+	bool* walls;
+	int num_edges;
+	int maze_size;
+
 	Mesh*			mesh;
 
 	bool*	flat_maze;	//[flat_maze_size x flat_maze_size]

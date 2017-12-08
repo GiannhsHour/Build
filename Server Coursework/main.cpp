@@ -53,7 +53,11 @@ NetworkBase server;
 GameTimer timer;
 float accum_time = 0.0f;
 float rotation = 0.0f;
-MazeGenerator*	generator;
+MazeGenerator	generator;
+int maze_edges = 0;
+bool* edges;
+int maze_size = 0;
+float maze_density = 0.0f;
 
 void Win32_PrintAllAdapterIPAddresses();
 
@@ -65,7 +69,8 @@ int onExit(int exitcode)
 }
 
 int main(int arcg, char** argv)
-{
+{   
+	srand((uint)time(NULL));
 	
 	if (enet_initialize() != 0)
 	{
@@ -102,12 +107,35 @@ int main(int arcg, char** argv)
 				break;
 
 			case ENET_EVENT_TYPE_RECEIVE:
-				printf("\t Received data from client %d \n", evnt.peer->incomingPeerID);
+				printf("\t Received data from client %d. Data length: %d \n", evnt.peer->incomingPeerID, evnt.packet->dataLength );
 				if (evnt.packet->dataLength == sizeof(std::pair<int,float>))
 				{
 					std::pair<int, float> p;
 					memcpy(&p, evnt.packet->data, sizeof(std::pair<int,float>));
-					printf("\t Received size: %d and density %f", p.first, p.second);
+					printf("\t Received size: %d and density %f \n", p.first, p.second);
+
+					ENetPacket* packet = enet_packet_create(&p, sizeof(std::pair<int,float>), 0);
+					enet_host_broadcast(server.m_pNetwork, 0, packet);
+
+					printf("\t Generating Maze... \n");
+					maze_size = p.first;
+					maze_density = p.second;
+					generator.Generate(p.first, p.second);
+					maze_edges = p.first * (p.first - 1) * 2;
+					edges = new bool[maze_edges];
+					for (int i = 0; i < maze_edges; i++) {
+						edges[i] = (generator.allEdges[i]._iswall);
+					}
+					
+					printf("\t Maze Generated!.\n");
+					
+				}
+				else if (evnt.packet->dataLength == sizeof(char) * 2) {
+
+					printf("\t Sending data to Clients!\n");
+
+					ENetPacket * packet = enet_packet_create(edges, maze_edges * sizeof(bool), 0);
+					enet_host_broadcast(server.m_pNetwork, 0, packet);
 				}
 				else
 				{   
@@ -124,23 +152,23 @@ int main(int arcg, char** argv)
 		});
 		
 		//Broadcast update packet to all connected clients at a rate of UPDATE_TIMESTEP updates per second
-		if (accum_time >= UPDATE_TIMESTEP)
-		{
+		//if (accum_time >= UPDATE_TIMESTEP)
+		//{
 
-			//Packet data
-			// - At the moment this is just a position update that rotates around the origin of the world
-			//   though this can be any variable, structure or class you wish. Just remember that everything 
-			//   you send takes up valuable network bandwidth so no sending every PhysicsObject struct each frame ;)
-			accum_time = 0.0f;
-			Vector3 pos = Vector3(
-				cos(rotation) * 2.0f,
-				1.5f,
-				sin(rotation) * 2.0f);
+		//	//Packet data
+		//	// - At the moment this is just a position update that rotates around the origin of the world
+		//	//   though this can be any variable, structure or class you wish. Just remember that everything 
+		//	//   you send takes up valuable network bandwidth so no sending every PhysicsObject struct each frame ;)
+		//	accum_time = 0.0f;
+		//	Vector3 pos = Vector3(
+		//		cos(rotation) * 2.0f,
+		//		1.5f,
+		//		sin(rotation) * 2.0f);
 
-			//Create the packet and broadcast it (unreliable transport) to all clients
-			ENetPacket* position_update = enet_packet_create(&pos, sizeof(Vector3), 0);
-			enet_host_broadcast(server.m_pNetwork, 0, position_update);
-		}
+		//	//Create the packet and broadcast it (unreliable transport) to all clients
+		//	ENetPacket* position_update = enet_packet_create(&pos, sizeof(Vector3), 0);
+		//	enet_host_broadcast(server.m_pNetwork, 0, position_update);
+		//}
 
 		Sleep(0);
 	}
