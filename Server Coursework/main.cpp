@@ -40,6 +40,7 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 #include <nclgl\common.h>
 #include <ncltech\NetworkBase.h>
 #include "MazeGenerator.h"
+#include <sstream>
 
 //Needed to get computer adapter IPv4 addresses via windows
 #include <iphlpapi.h>
@@ -53,6 +54,7 @@ NetworkBase server;
 GameTimer timer;
 float accum_time = 0.0f;
 float rotation = 0.0f;
+
 MazeGenerator	generator;
 int maze_edges = 0;
 bool* edges;
@@ -66,6 +68,36 @@ int onExit(int exitcode)
 	server.Release();
 	system("pause");
 	exit(exitcode);
+}
+
+void BroadcastData(char* data) {
+	ENetPacket* packet = enet_packet_create(data, strlen(data), 0);
+	enet_host_broadcast(server.m_pNetwork, 0, packet);
+}
+
+string extractId(enet_uint8* packet) {
+	stringstream ss;
+	for (int i = 0; i < 4; i++) {
+		ss << packet[i];
+	}
+	string res;
+	ss >> res;
+	return res;
+}
+
+string extractData(enet_uint8* packet, int length) {
+	if (length > 4) {
+		stringstream ss;
+
+		for (int i = 4; i < length; i++) {
+			ss << packet[i];
+		}
+		string res;
+		getline(ss, res);
+		return res.substr(1);
+	}
+	else return "";
+
 }
 
 int main(int arcg, char** argv)
@@ -99,52 +131,60 @@ int main(int arcg, char** argv)
 
 		//Handle All Incoming Packets and Send any enqued packets
 		server.ServiceNetwork(dt, [&](const ENetEvent& evnt)
-		{
+		{   
+			
 			switch (evnt.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT:
 				printf("-%d Client Connected\n", evnt.peer->incomingPeerID);
 				break;
 
-			case ENET_EVENT_TYPE_RECEIVE:
-				printf("\t Received data from client %d. Data length: %d \n", evnt.peer->incomingPeerID, evnt.packet->dataLength );
-				if (evnt.packet->dataLength == sizeof(std::pair<int,float>))
-				{
-					std::pair<int, float> p;
-					memcpy(&p, evnt.packet->data, sizeof(std::pair<int,float>));
-					printf("\t Received size: %d and density %f \n", p.first, p.second);
+			case ENET_EVENT_TYPE_RECEIVE: 
+			{
 
-					ENetPacket* packet = enet_packet_create(&p, sizeof(std::pair<int,float>), 0);
-					enet_host_broadcast(server.m_pNetwork, 0, packet);
+				printf("\t Received data from client %d. Data length: %d \n", evnt.peer->incomingPeerID, evnt.packet->dataLength);
+				string id = extractId(evnt.packet->data);
+				string data = extractData(evnt.packet->data, evnt.packet->dataLength);
+				
+				if (id == "INIT") {
+					stringstream ss;
+					string vals;
+					ss << data;
+					ss >> vals;
+					maze_size = stoi(vals);
+					ss >> vals;
+					maze_density = stof(vals);
+					printf("\t Received size: %d and density %f from client %d \n", maze_size, maze_density, evnt.peer->incomingPeerID);
+					string send = id +" "+data;
+					BroadcastData(&send[0]);
 
 					printf("\t Generating Maze... \n");
-					maze_size = p.first;
-					maze_density = p.second;
-					generator.Generate(p.first, p.second);
-					maze_edges = p.first * (p.first - 1) * 2;
+				
+					generator.Generate(maze_size, maze_density);
+					maze_edges = maze_size * (maze_size - 1) * 2;
 					edges = new bool[maze_edges];
 					for (int i = 0; i < maze_edges; i++) {
 						edges[i] = (generator.allEdges[i]._iswall);
 					}
-					
+
 					printf("\t Maze Generated!.\n");
-					
 				}
-				else if (evnt.packet->dataLength == sizeof(char) * 2) {
-
+				else if (id == "OOKK") {
 					printf("\t Sending data to Clients!\n");
-
-					ENetPacket * packet = enet_packet_create(edges, maze_edges * sizeof(bool), 0);
-					enet_host_broadcast(server.m_pNetwork, 0, packet);
+					string send = "MAZE ";
+					for (int i = 0; i < maze_edges; i++) {
+						send += to_string(edges[i]);
+					}
+					BroadcastData(&send[0]);
 				}
 				else
-				{   
+				{
 					NCLERROR("Size of package received: %d", evnt.packet->dataLength);
 					NCLERROR("Recieved Invalid Network Packet!");
 				}
 				enet_packet_destroy(evnt.packet);
 				break;
-
+			}
 			case ENET_EVENT_TYPE_DISCONNECT:
 				printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
 				break;

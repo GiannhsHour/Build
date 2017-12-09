@@ -158,6 +158,15 @@ void Net1_Client::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);
 }
 
+
+void Net1_Client::SendDataToServer(string data) {
+
+	ENetPacket* packet = enet_packet_create(&data[0], data.length(), 0);
+	enet_peer_send(serverConnection, 0, packet);
+}
+
+
+
 void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 {
 	switch (evnt.type)
@@ -168,12 +177,14 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 			if (evnt.peer == serverConnection)
 			{
 				NCLDebug::Log(status_color3, "Network: Successfully connected to server!");
-
-				int maze_size = 6;
-				float density = 0.4f;
-				std::pair<int, float> p = std::make_pair<>(maze_size, density);
-				ENetPacket* packet = enet_packet_create(&p, sizeof(pair<int,float>), 0);
-				enet_peer_send(serverConnection, 0, packet);
+				int maze_size;
+				float density;
+				printf("Choose maze size: \n");
+				cin >> maze_size;
+				printf("Choose density: \n");
+				cin >> density;
+				string data = "INIT " + to_string(maze_size) + " " + to_string(density).substr(0, 4) + "\n";
+				SendDataToServer(data);
 			}	
 		}
 		break;
@@ -181,32 +192,34 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 
 	//Server has sent us a new packet
 	case ENET_EVENT_TYPE_RECEIVE:
-		{   
+		{   printf("\t Received data from server %d. Data length: %d \n", evnt.peer->incomingPeerID, evnt.packet->dataLength);
+			string id = extractId(evnt.packet->data);
+			string data = extractData(evnt.packet->data, evnt.packet->dataLength);
 		
-			if (evnt.packet->dataLength == sizeof(std::pair<int,float>))
+			if (id == "INIT") 
 			{
-				std::pair<int, float> p;
-				memcpy(&p, evnt.packet->data, sizeof(std::pair<int, float>));
-				maze_size = p.first;
-				maze_density = p.second;
-				char* response = "OK";
-				ENetPacket* packet = enet_packet_create(response, sizeof(char)*2, 0);
-				cout << "Sending size: "<< packet->dataLength << endl;
-				enet_peer_send(serverConnection, 0, packet);
+				stringstream ss;
+				string vals;
+				ss << data;
+				ss >> vals;
+				maze_size = stoi(vals);
+				ss >> vals;
+				maze_density = stof(vals);
+				printf("\t Received size: %d and density %f from server \n", maze_size, maze_density);
+				string response = "OOKK";
+				SendDataToServer(response);
 			}
-
-			else if (evnt.packet->dataLength == 6 * 5 * 2) {
+			else if (id == "MAZE") {
 				int maze_edges = maze_size*(maze_size - 1) * 2;
+				printf("\t Server created maze! Now rendering.. Number of edges = %d \n", maze_edges);
 				bool * walls = new bool[maze_edges];
-				
-				memcpy(walls, evnt.packet->data, maze_edges);
-				
+
+	
 				for (int i = 0; i < maze_edges; i++) {
-					cout << walls[i] << endl;
+					walls[i] = data[i] == '1' ? true : false ;
 				}
 
 				MazeRenderer * maze = new MazeRenderer(walls, maze_size);
-				cout << maze << endl;
 				this->AddGameObject(maze);
 			}
 			else

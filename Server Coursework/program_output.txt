@@ -1,2 +1,2 @@
-[15:26:36] [ERROR] e:\gametech 2017\build\server coursework\main.cpp:141
-[15:26:36] 	  "Size of package received: 8"
+[15:45:33] [ERROR] c:\users\giannhs\desktop\newcastle uni\gametech\build\server coursework\main.cpp:185
+[15:45:33] 	  "Size of package received: 11"
