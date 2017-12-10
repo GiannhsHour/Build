@@ -86,7 +86,8 @@ produce satisfactory results on the networked peers.
 #include <nclgl\NCLDebug.h>
 #include <ncltech\DistanceConstraint.h>
 #include <ncltech\CommonUtils.h>
-#include "MazeRenderer.h"
+
+
 
 const Vector3 status_color3 = Vector3(1.0f, 0.6f, 0.6f);
 const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_color3.z, 1.0f);
@@ -95,6 +96,7 @@ Net1_Client::Net1_Client(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
 	, box(NULL)
+	, draw_path(false)
 {
 }
 
@@ -141,7 +143,18 @@ void Net1_Client::OnUpdateScene(float dt)
 		std::placeholders::_1);				// Where to place the first parameter
 	network.ServiceNetwork(dt, callback);
 
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J)) {
+		if (maze_size > 0) {
+			string send = "CRDS 14 0 0 5 6 14";
+			SendDataToServer(&send[0]);
+		}
+	}
 
+	if (draw_path) {
+		maze->DrawRoute(path_vec, 0.06f, maze_size);
+	}
+
+		
 
 	//Add Debug Information to screen
 	uint8_t ip1 = serverConnection->address.host & 0xFF;
@@ -219,8 +232,27 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 					walls[i] = data[i] == '1' ? true : false ;
 				}
 
-				MazeRenderer * maze = new MazeRenderer(walls, maze_size);
+				maze = new MazeRenderer(walls, maze_size);
 				this->AddGameObject(maze);
+			}
+
+			else if (id == "ROUT") {
+				draw_path = true;
+				stringstream ss;
+				ss << data;
+				while (!ss.eof()) {
+					string p;
+					float x, y, z;
+					ss >> p; 
+					if (p != "") {
+						x = stof(p);
+						ss >> p; y = stof(p);
+						ss >> p; z = stof(p);
+						Vector3 node_pos = Vector3(x, y, z);
+						path_vec.push_back(node_pos);
+					}
+				}
+			
 			}
 			else
 			{   	

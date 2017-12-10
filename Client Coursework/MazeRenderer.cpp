@@ -82,6 +82,31 @@ void MazeRenderer::DrawSearchHistory(const SearchHistory& history, float line_wi
 	}
 }
 
+void MazeRenderer::DrawRoute(vector<Vector3> final, float line_width, int maze_size)
+{
+	float grid_scalar = 1.0f / (float)maze_size;
+	float col_factor = 0.2f / (float)final.size();
+
+	Matrix4 transform = this->Render()->GetWorldTransform();
+
+	float index = 0.0f;
+	for (int i = 0; i< final.size()-1 ; i++)
+	{
+		Vector3 start = transform * Vector3(
+			(final[i].x + 0.5f) * grid_scalar,
+			0.1f,
+			(final[i].y + 0.5f) * grid_scalar);
+
+		Vector3 end = transform * Vector3(
+			(final[i+1].x + 0.5f) * grid_scalar,
+			0.1f,
+			(final[i+1].y + 0.5f) * grid_scalar);
+
+		NCLDebug::DrawThickLine(start, end, line_width, CommonUtils::GenColor(0.8f + index * col_factor));
+		index += 1.0f;
+	}
+}
+
 uint MazeRenderer::Generate_FlatMaze()
 {
 	//Generates a 3xsize by 3xsize array of booleans, where 
@@ -236,7 +261,7 @@ void MazeRenderer::Generate_BuildRenderNodes()
 
 		Vector3 centre = (end + start) * 0.5f;
 		Vector3 halfDims = centre - start;
-
+		
 		cube = new RenderNode(mesh, wall_color);
 		cube->SetTransform(Matrix4::Translation(centre) * Matrix4::Scale(halfDims));
 		root->AddChild(cube);

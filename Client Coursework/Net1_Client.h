@@ -3,6 +3,7 @@
 
 #include <ncltech\Scene.h>
 #include <ncltech\NetworkBase.h>
+#include "MazeRenderer.h"
 #include <sstream>
 
 //Basic Network Example
@@ -42,8 +43,17 @@ protected:
 	}
 
 	GameObject* box;
+
+	MazeRenderer * maze;
+
 	int maze_size = 0;
 	float maze_density = 0.0f;
+	
+	vector<Vector3> path_vec;
+	bool draw_path;
+
 	NetworkBase network;
 	ENetPeer*	serverConnection;
+	
+
 };

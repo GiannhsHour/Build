@@ -40,6 +40,7 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 #include <nclgl\common.h>
 #include <ncltech\NetworkBase.h>
 #include "MazeGenerator.h"
+#include "SearchAStar.h"
 #include <sstream>
 
 //Needed to get computer adapter IPv4 addresses via windows
@@ -176,6 +177,27 @@ int main(int arcg, char** argv)
 						send += to_string(edges[i]);
 					}
 					BroadcastData(&send[0]);
+				}
+				else if (id == "CRDS") {
+					printf("\t Received coords for start and end point: %s", data.c_str());
+					SearchAStar* search_as = new SearchAStar();
+					search_as->SetWeightings(1.0f, 1.0f);
+
+					GraphNode* start = generator.GetStartNode();
+					GraphNode* end = generator.GetGoalNode();
+					search_as->FindBestPath(start, end);
+					std::list<const GraphNode*> list = search_as->GetFinalPath();
+					string send = "ROUT ";
+					for (std::list<const GraphNode*>::iterator it = list.begin(); it != list.end(); it++) {
+						send += to_string((*it)->_pos.x) + " " + to_string((*it)->_pos.y) + " " + to_string((*it)->_pos.z) + " ";
+					}
+				
+					BroadcastData(&send[0]);
+					// SetStartNode generator.allNodes[ x  y  ] size;
+					// search a star
+					// send nav mesh
+					// send pos of final path graph nodes
+					// draw thick line in renderer;
 				}
 				else
 				{

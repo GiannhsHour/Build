@@ -27,6 +27,7 @@ public:
 	//The search history draws from edges because they already store the 'to'
 	// and 'from' of GraphNodes.
 	void DrawSearchHistory(const SearchHistory& history, float line_width);
+	void DrawRoute(vector<Vector3>, float line_width , int maze_size);
 
 
 protected:
