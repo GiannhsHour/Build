@@ -95,7 +95,7 @@ const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_co
 Net1_Client::Net1_Client(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
-	, box(NULL)
+	, avatar(NULL)
 	
 {
 }
@@ -119,13 +119,21 @@ void Net1_Client::OnInitializeScene()
 	}
 
 	//Generate Simple Scene with a box that can be updated upon recieving server packets
+	avatar = CommonUtils::BuildCuboidObject("avatar",
+		Vector3(0,0,0),								//Position
+		Vector3(0.1f, 0.1f, 0.1f),				//Half dimensions
+		false,									//Has Physics Object
+		0.5f,									//Infinite Mass
+		false,									//Has Collision Shape
+		false,									//Dragable by the user
+		Vector4(0.1f, 0.8f, 0.1f, 1.0f));	//Color
 
 }
 
 void Net1_Client::OnCleanupScene()
 {
 	Scene::OnCleanupScene();
-	box = NULL; // Deleted in above function
+	avatar = NULL; // Deleted in above function
 
 	//Send one final packet telling the server we are disconnecting
 	// - We are not waiting to resend this, so if it fails to arrive
@@ -208,6 +216,15 @@ void Net1_Client::SendDataToServer(string data) {
 	enet_peer_send(serverConnection, 0, packet);
 }
 
+Vector3 Net1_Client::ConvertToWorldPos(Vector3 cellpos, int maze_sz, GameObject* obj) {
+	float grid_scalar = 1.0f / (float)maze_size;
+	Matrix4 transform = obj->Render()->GetWorldTransform();
+	return transform * Vector3(
+		(cellpos.x + 0.5f) * grid_scalar,
+		0.1f,
+		(cellpos.y + 0.5f) * grid_scalar) ;
+}
+
 
 
 void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
@@ -228,7 +245,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 
 	//Server has sent us a new packet
 	case ENET_EVENT_TYPE_RECEIVE:
-		{   printf("\t Received data from server %d. Data length: %d \n", evnt.peer->incomingPeerID, evnt.packet->dataLength);
+		{   //printf("\t Received data from server %d. Data length: %d \n", evnt.peer->incomingPeerID, evnt.packet->dataLength);
 			string id = extractId(evnt.packet->data);
 			string data = extractData(evnt.packet->data, evnt.packet->dataLength);
 		
@@ -258,7 +275,9 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 					walls[i] = data[i] == '1' ? true : false ;
 				}
 
+				maze_scalar = Matrix4::Scale(Vector3(1, 5.0f / float(maze_size), 1));
 				maze = new MazeRenderer(walls, maze_size);
+			    maze->Render()->SetTransform(maze_scalar);
 				this->AddGameObject(maze);
 			}
 
@@ -279,8 +298,26 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 						path_vec.push_back(node_pos);
 					}
 				}
+				this->AddGameObject(avatar);
 			
 			}
+			else if (id == "POSI") {
+				stringstream ss;
+				ss << data;
+				while (!ss.eof()) {
+					string p;
+					float x, y, z;
+					ss >> p;
+					if (p != "") {
+						x = stof(p);
+						ss >> p; y = stof(p);
+						ss >> p; z = stof(p);
+						Vector3 avatar_pos = Vector3(x, y, z);
+						(*avatar->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, avatar))*Matrix4::Scale(Vector3(0.02f,0.02f,0.02f)));
+					}
+				}
+			}
+
 			else
 			{   	
 				NCLERROR("Recieved Invalid Network Packet!");

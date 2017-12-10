@@ -22,6 +22,7 @@ public:
 
 protected:
 	void SendDataToServer(string data);
+	Vector3 ConvertToWorldPos(Vector3 cellpos, int maze_sz, GameObject* obj);
 	string extractId(enet_uint8* packet) {
 		stringstream ss;
 		for (int i = 0; i < 4; i++) {
@@ -42,8 +43,8 @@ protected:
 		return res.substr(1);
 	}
 
-	GameObject* box;
-
+	GameObject* avatar;
+	Matrix4 maze_scalar;
 	MazeRenderer * maze;
 
 	int maze_size = 0;

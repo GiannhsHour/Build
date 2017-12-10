@@ -38,6 +38,7 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 #include <nclgl\GameTimer.h>
 #include <nclgl\Vector3.h>
 #include <nclgl\common.h>
+#include <ncltech\PhysicsNode.h>
 #include <ncltech\NetworkBase.h>
 #include "MazeGenerator.h"
 #include "SearchAStar.h"
@@ -61,6 +62,16 @@ int maze_edges = 0;
 bool* edges;
 int maze_size = 0;
 float maze_density = 0.0f;
+
+std::list<const GraphNode*> final_path;
+vector<Vector3> avatar_velocities;
+vector<Vector3> avatar_cellpos;
+int avatarIndex = 0;
+
+PhysicsNode* avatar;
+bool enable_avatar = false;
+
+
 
 void Win32_PrintAllAdapterIPAddresses();
 
@@ -101,6 +112,19 @@ string extractData(enet_uint8* packet, int length) {
 
 }
 
+void calculate_velocities() {
+	for (std::list<const GraphNode*>::iterator it = final_path.begin(); it != final_path.end(); ) {
+		Vector3 startp = (*it)->_pos;
+		++it;
+		if (it != final_path.end()) {
+			Vector3 endp = (*it)->_pos;
+			avatar_velocities.push_back(endp - startp);
+		}
+	}
+
+	
+}
+
 int main(int arcg, char** argv)
 {   
 	srand((uint)time(NULL));
@@ -120,6 +144,8 @@ int main(int arcg, char** argv)
 
 	printf("Server Initiated\n");
 
+	//Initialise the PhysicsEngine
+	PhysicsEngine::Instance();
 
 	Win32_PrintAllAdapterIPAddresses();
 
@@ -148,6 +174,7 @@ int main(int arcg, char** argv)
 				string data = extractData(evnt.packet->data, evnt.packet->dataLength);
 				
 				if (id == "INIT") {
+					enable_avatar = false;
 					stringstream ss;
 					string vals;
 					ss << data;
@@ -194,22 +221,25 @@ int main(int arcg, char** argv)
 						else indexe = y % maze_size * maze_size + x;
 					}
 
-
 					GraphNode* start = &generator.allNodes[indexs];
 					GraphNode* end = &generator.allNodes[indexe];
+					
+					enable_avatar = true;
+					avatar = new PhysicsNode();
+					avatar->SetPosition(start->_pos);
+					PhysicsEngine::Instance()->AddPhysicsObject(avatar);
+
 					search_as->FindBestPath(start, end);
-					std::list<const GraphNode*> list = search_as->GetFinalPath();
+					final_path = search_as->GetFinalPath();
 					string send = "ROUT ";
-					for (std::list<const GraphNode*>::iterator it = list.begin(); it != list.end(); it++) {
+					for (std::list<const GraphNode*>::iterator it = final_path.begin(); it != final_path.end(); it++) {
 						send += to_string((*it)->_pos.x) + " " + to_string((*it)->_pos.y) + " " + to_string((*it)->_pos.z) + " ";
+						avatar_cellpos.push_back((*it)->_pos);
 					}
 					printf("\t Broadcasting final graph to clients.");
 					BroadcastData(&send[0]);
-					// SetStartNode generator.allNodes[ x  y  ] size;
-					// search a star
-					// send nav mesh
-					// send pos of final path graph nodes
-					// draw thick line in renderer;
+
+					calculate_velocities();
 				}
 				else
 				{
@@ -224,25 +254,24 @@ int main(int arcg, char** argv)
 				break;
 			}
 		});
-		
-		//Broadcast update packet to all connected clients at a rate of UPDATE_TIMESTEP updates per second
-		//if (accum_time >= UPDATE_TIMESTEP)
-		//{
 
-		//	//Packet data
-		//	// - At the moment this is just a position update that rotates around the origin of the world
-		//	//   though this can be any variable, structure or class you wish. Just remember that everything 
-		//	//   you send takes up valuable network bandwidth so no sending every PhysicsObject struct each frame ;)
-		//	accum_time = 0.0f;
-		//	Vector3 pos = Vector3(
-		//		cos(rotation) * 2.0f,
-		//		1.5f,
-		//		sin(rotation) * 2.0f);
-
-		//	//Create the packet and broadcast it (unreliable transport) to all clients
-		//	ENetPacket* position_update = enet_packet_create(&pos, sizeof(Vector3), 0);
-		//	enet_host_broadcast(server.m_pNetwork, 0, position_update);
-		//}
+		if (accum_time >= UPDATE_TIMESTEP) {
+			accum_time = 0.0f;
+			if (enable_avatar) {
+				if (avatarIndex < avatar_velocities.size()) {
+					avatar->SetLinearVelocity(avatar_velocities[avatarIndex]*2.0f);
+					float avatar_dist = (avatar->GetPosition() - avatar_cellpos[avatarIndex + 1]).Length();
+					if (avatar_dist <= 0.1f) {
+						avatar->SetPosition(avatar_cellpos[avatarIndex + 1]);
+						avatarIndex++;
+					}
+					string send = "POSI " + to_string(avatar->GetPosition().x) + " " + to_string(avatar->GetPosition().y) + " " + to_string(avatar->GetPosition().z);
+					cout << send << endl;
+					BroadcastData(&send[0]);
+				}
+			}
+		}
+		PhysicsEngine::Instance()->Update(dt);
 
 		Sleep(0);
 	}

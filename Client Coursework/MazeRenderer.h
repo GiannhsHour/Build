@@ -59,5 +59,7 @@ protected:
 
 	vector<RenderNode*> nodes;
 
+	RenderNode* startNode;
+
 	WallDescriptorVec	wall_descriptors;
 };

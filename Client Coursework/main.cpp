@@ -124,7 +124,7 @@ int main()
 		SceneManager::Instance()->GetCurrentScene()->FireOnSceneUpdate(dt);
 
 		//Update Physics
-		PhysicsEngine::Instance()->Update(dt);
+	//	PhysicsEngine::Instance()->Update(dt);
 		PhysicsEngine::Instance()->DebugRender();
 
 		//Render Scene

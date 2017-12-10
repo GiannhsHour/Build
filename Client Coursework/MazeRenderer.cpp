@@ -334,7 +334,9 @@ void MazeRenderer::DrawStartEndNodes(Vector3* start, Vector3* end) {
 	cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	root->AddChild(cube);
 	nodes.push_back(cube);
-	
+	startNode = cube;
+
+
 	cellpos = Vector3(end->x * 3, 0.0f, end->y * 3) * scalar;
 	cube = new RenderNode(mesh, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 	cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
