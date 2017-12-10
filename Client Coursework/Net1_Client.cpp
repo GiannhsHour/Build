@@ -126,7 +126,7 @@ void Net1_Client::OnInitializeScene()
 		0.5f,									//Infinite Mass
 		false,									//Has Collision Shape
 		false,									//Dragable by the user
-		Vector4(0.1f, 0.8f, 0.1f, 1.0f));	//Color
+		Vector4(0.0f, 0.0f, 1.0f, 1.0f));	//Color
 
 }
 

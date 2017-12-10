@@ -225,6 +225,9 @@ int main(int arcg, char** argv)
 					GraphNode* end = &generator.allNodes[indexe];
 					
 					enable_avatar = true;
+					avatarIndex = 0;
+					avatar_cellpos.clear();
+					avatar_velocities.clear();
 					avatar = new PhysicsNode();
 					avatar->SetPosition(start->_pos);
 					PhysicsEngine::Instance()->AddPhysicsObject(avatar);
@@ -266,7 +269,6 @@ int main(int arcg, char** argv)
 						avatarIndex++;
 					}
 					string send = "POSI " + to_string(avatar->GetPosition().x) + " " + to_string(avatar->GetPosition().y) + " " + to_string(avatar->GetPosition().z);
-					cout << send << endl;
 					BroadcastData(&send[0]);
 				}
 			}
