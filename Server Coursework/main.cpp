@@ -182,9 +182,21 @@ int main(int arcg, char** argv)
 					printf("\t Received coords for start and end point: %s", data.c_str());
 					SearchAStar* search_as = new SearchAStar();
 					search_as->SetWeightings(1.0f, 1.0f);
+					stringstream ss;
+					int indexs, indexe;
+					int x, y;
+					string coord;
+					ss << data;
+					for (int i = 0; i < 2; i++) {
+						ss >> coord; x = stoi(coord);
+						ss >> coord; y = stoi(coord); ss >> coord;
+						if (i == 0) indexs = x % maze_size * maze_size + y;
+						else indexe = x % maze_size * maze_size + y;
+					}
 
-					GraphNode* start = generator.GetStartNode();
-					GraphNode* end = generator.GetGoalNode();
+
+					GraphNode* start = &generator.allNodes[indexs];
+					GraphNode* end = &generator.allNodes[indexe];
 					search_as->FindBestPath(start, end);
 					std::list<const GraphNode*> list = search_as->GetFinalPath();
 					string send = "ROUT ";

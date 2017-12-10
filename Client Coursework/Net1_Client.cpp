@@ -145,7 +145,7 @@ void Net1_Client::OnUpdateScene(float dt)
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J)) {
 		if (maze_size > 0) {
-			string send = "CRDS 14 0 0 5 6 14";
+			string send = "CRDS 14 0 0 15 14 0";
 			SendDataToServer(&send[0]);
 		}
 	}
