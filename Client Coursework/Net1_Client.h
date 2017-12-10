@@ -52,6 +52,9 @@ protected:
 	vector<Vector3> path_vec;
 	bool draw_path;
 
+	Vector3* start;
+	Vector3* end;
+
 	NetworkBase network;
 	ENetPeer*	serverConnection;
 	

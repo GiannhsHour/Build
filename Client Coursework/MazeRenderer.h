@@ -28,6 +28,7 @@ public:
 	// and 'from' of GraphNodes.
 	void DrawSearchHistory(const SearchHistory& history, float line_width);
 	void DrawRoute(vector<Vector3>, float line_width , int maze_size);
+	void DrawStartEndNodes(Vector3* start, Vector3* end);
 
 
 protected:

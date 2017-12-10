@@ -190,8 +190,8 @@ int main(int arcg, char** argv)
 					for (int i = 0; i < 2; i++) {
 						ss >> coord; x = stoi(coord);
 						ss >> coord; y = stoi(coord); ss >> coord;
-						if (i == 0) indexs = x % maze_size * maze_size + y;
-						else indexe = x % maze_size * maze_size + y;
+						if (i == 0) indexs = y % maze_size * maze_size + x;
+						else indexe = y % maze_size * maze_size + x;
 					}
 
 

@@ -146,12 +146,15 @@ void Net1_Client::OnUpdateScene(float dt)
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J)) {
 		if (maze_size > 0) {
 			string send = "CRDS 14 0 0 15 14 0";
+			start = new Vector3(14, 0, 0);
+			end = new Vector3(15, 14, 0);
 			SendDataToServer(&send[0]);
 		}
 	}
 
 	if (draw_path) {
 		maze->DrawRoute(path_vec, 0.06f, maze_size);
+		maze->DrawStartEndNodes(start, end);
 	}
 
 		
