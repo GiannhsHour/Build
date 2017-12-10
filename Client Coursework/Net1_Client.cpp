@@ -102,6 +102,10 @@ Net1_Client::Net1_Client(const std::string& friendly_name)
 
 void Net1_Client::OnInitializeScene()
 {    
+
+	Camera * camera = GraphicsPipeline::Instance()->GetCamera();
+	camera->SetPosition(Vector3(0.45f, 4.5f, 0.47f));
+	camera->SetPitch(-90);
 	draw_path = false;
 	path_vec.clear();
 	//Initialize Client Network
@@ -145,11 +149,19 @@ void Net1_Client::OnUpdateScene(float dt)
 		std::placeholders::_1);				// Where to place the first parameter
 	network.ServiceNetwork(dt, callback);
 
+	//Send start - end coords to server
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J)) {
 		if (maze_size > 0) {
-			string send = "CRDS 14 0 0 15 14 0";
-			start = new Vector3(14, 0, 0);
-			end = new Vector3(15, 14, 0);
+			int startx = rand() % maze_size;
+			int starty = rand() % maze_size;
+
+			int endx = rand() % maze_size;
+			int endy = rand() % maze_size;
+
+			string send = "CRDS " + to_string(startx) + " " + to_string(starty) + " " + to_string(0) + " "
+				+ to_string(endx) + " " + to_string(endy) + " " + to_string(0);
+			start = new Vector3(startx, starty, 0);
+			end = new Vector3(endx, endy, 0);
 			SendDataToServer(&send[0]);
 		}
 	}
@@ -242,6 +254,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 			}
 
 			else if (id == "ROUT") {
+				path_vec.clear();
 				draw_path = true;
 				stringstream ss;
 				ss << data;

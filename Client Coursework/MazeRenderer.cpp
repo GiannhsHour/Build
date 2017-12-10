@@ -319,29 +319,25 @@ void MazeRenderer::Generate_BuildRenderNodes()
 
 void MazeRenderer::DrawStartEndNodes(Vector3* start, Vector3* end) {
 	//Finally - our start/end goals
+	
 	RenderNode *cube, *root = Render();
+	for (int i = 0; i < nodes.size(); i++) {
+		root->RemoveChild(nodes[i]);
+	}
+	nodes.clear();
+
 	const float scalar = 1.f / (float)flat_maze_size;
-	Vector3 cellpos = Vector3(
-	start->x * 3,
-	0.0f,
-	start->y * 3
-	) * scalar;
-	Vector3 cellsize = Vector3(
-	scalar * 2,
-	1.0f,
-	scalar * 2
-	);
+	Vector3 cellpos = Vector3(start->x * 3, 0.0f, start->y * 3) * scalar;
+	Vector3 cellsize = Vector3(scalar * 2, 1.0f, scalar * 2);
 
 	cube = new RenderNode(mesh, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
 	cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	root->AddChild(cube);
-
-	cellpos = Vector3(
-	end->x * 3,
-	0.0f,
-	end->y * 3
-	) * scalar;
+	nodes.push_back(cube);
+	
+	cellpos = Vector3(end->x * 3, 0.0f, end->y * 3) * scalar;
 	cube = new RenderNode(mesh, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
 	cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	root->AddChild(cube);
+	nodes.push_back(cube);
 }

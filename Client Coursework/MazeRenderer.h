@@ -57,5 +57,7 @@ protected:
 	bool*	flat_maze;	//[flat_maze_size x flat_maze_size]
 	uint	flat_maze_size;
 
+	vector<RenderNode*> nodes;
+
 	WallDescriptorVec	wall_descriptors;
 };
