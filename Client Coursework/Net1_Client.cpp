@@ -166,6 +166,19 @@ void Net1_Client::OnUpdateScene(float dt)
 		}
 	}
 
+
+	//Send Init maze instructions to the server (maze size and density)
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_I)) {
+			int maze_sz;
+			float dens;
+			printf("Choose maze size: \n");
+			cin >> maze_sz;
+			printf("Choose density: \n");
+			cin >> dens;
+			string data = "INIT " + to_string(maze_sz) + " " + to_string(dens).substr(0, 4) + "\n";
+			SendDataToServer(data);
+	}
+
 	if (draw_path) {
 		maze->DrawRoute(path_vec, 0.06f, maze_size);
 		maze->DrawStartEndNodes(start, end);
@@ -207,14 +220,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 			if (evnt.peer == serverConnection)
 			{
 				NCLDebug::Log(status_color3, "Network: Successfully connected to server!");
-				int maze_size;
-				float density;
-				printf("Choose maze size: \n");
-				cin >> maze_size;
-				printf("Choose density: \n");
-				cin >> density;
-				string data = "INIT " + to_string(maze_size) + " " + to_string(density).substr(0, 4) + "\n";
-				SendDataToServer(data);
+				
 			}	
 		}
 		break;
@@ -240,6 +246,9 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				SendDataToServer(response);
 			}
 			else if (id == "MAZE") {
+				if (maze) {
+					this->RemoveGameObject(maze);
+				}
 				int maze_edges = maze_size*(maze_size - 1) * 2;
 				printf("\t Server created maze! Now rendering.. Number of edges = %d \n", maze_edges);
 				bool * walls = new bool[maze_edges];
