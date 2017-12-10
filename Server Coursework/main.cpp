@@ -155,7 +155,7 @@ int main(int arcg, char** argv)
 					maze_size = stoi(vals);
 					ss >> vals;
 					maze_density = stof(vals);
-					printf("\t Received size: %d and density %f from client %d \n", maze_size, maze_density, evnt.peer->incomingPeerID);
+					printf("\t Received maze size %d and density %f from client %d \n", maze_size, maze_density, evnt.peer->incomingPeerID);
 					string send = id +" "+data;
 					BroadcastData(&send[0]);
 
@@ -179,7 +179,7 @@ int main(int arcg, char** argv)
 					BroadcastData(&send[0]);
 				}
 				else if (id == "CRDS") {
-					printf("\t Received coords for start and end point: %s", data.c_str());
+					printf("\t Received coords for start and end point: %s\n", data.c_str());
 					SearchAStar* search_as = new SearchAStar();
 					search_as->SetWeightings(1.0f, 1.0f);
 					stringstream ss;
@@ -203,7 +203,7 @@ int main(int arcg, char** argv)
 					for (std::list<const GraphNode*>::iterator it = list.begin(); it != list.end(); it++) {
 						send += to_string((*it)->_pos.x) + " " + to_string((*it)->_pos.y) + " " + to_string((*it)->_pos.z) + " ";
 					}
-				
+					printf("\t Broadcasting final graph to clients.");
 					BroadcastData(&send[0]);
 					// SetStartNode generator.allNodes[ x  y  ] size;
 					// search a star

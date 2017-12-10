@@ -96,12 +96,14 @@ Net1_Client::Net1_Client(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
 	, box(NULL)
-	, draw_path(false)
+	
 {
 }
 
 void Net1_Client::OnInitializeScene()
-{
+{    
+	draw_path = false;
+	path_vec.clear();
 	//Initialize Client Network
 	if (network.Initialize(0))
 	{
