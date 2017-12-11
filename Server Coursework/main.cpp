@@ -63,6 +63,8 @@ bool* edges;
 int maze_size = 0;
 float maze_density = 0.0f;
 
+int clients_connected = 0;
+
 
 struct Player {
 	std::list<const GraphNode*> final_path;
@@ -197,6 +199,7 @@ int main(int arcg, char** argv)
 			{
 			case ENET_EVENT_TYPE_CONNECT: {
 				printf("-%d Client Connected\n", evnt.peer->incomingPeerID);
+				clients_connected++;
 				Player *p = new Player();
 				p->enable_avatar = false;
 				players[evnt.peer] = p;
@@ -206,7 +209,7 @@ int main(int arcg, char** argv)
 
 
 
-				string send = "CONN " + to_string(evnt.peer->incomingPeerID);
+				string send = "CONN " + to_string(evnt.peer->incomingPeerID) +" " + to_string(clients_connected);
 				BroadcastData(&send[0]);
 				break;
 			}
@@ -300,6 +303,7 @@ int main(int arcg, char** argv)
 			}
 			case ENET_EVENT_TYPE_DISCONNECT:
 				printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
+				clients_connected--;
 				break;
 			}
 		});

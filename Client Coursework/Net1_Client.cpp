@@ -375,7 +375,9 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				ss << data;
 				string new_client_id;
 				ss >> new_client_id;
-				for (int i = 0; i < stoi(new_client_id)+1; i++) {
+				string clients_connected;
+				ss >> clients_connected;
+				for (int i = 0; i < stoi(clients_connected); i++) {
 					if (avatars[to_string(i)]) {
 						this->RemoveGameObject(avatars[to_string(i)]);
 					}
