@@ -23,6 +23,8 @@ public:
 protected:
 	void SendDataToServer(string data);
 	Vector3 ConvertToWorldPos(Vector3 cellpos, int maze_sz, GameObject* obj);
+	void CreateGround(int maze_sz,Vector3 halfdims);
+
 	string extractId(enet_uint8* packet) {
 		stringstream ss;
 		for (int i = 0; i < 4; i++) {
@@ -43,6 +45,8 @@ protected:
 		return res.substr(1);
 	}
 
+
+
 	GameObject* avatar;
 	Matrix4 maze_scalar;
 	MazeRenderer * maze;
@@ -55,6 +59,8 @@ protected:
 
 	Vector3* start;
 	Vector3* end;
+
+	Vector3* grid_position;
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;

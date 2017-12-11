@@ -23,6 +23,8 @@ namespace CommonUtils
 {
 	void DragableObjectCallback(GameObject* obj, float dt, const Vector3& newWsPos, const Vector3& wsMovedAmount, bool stopDragging);
 
+	void SelectableObjectCallBack(GameObject* obj, Vector3* pos);
+
 	//Generates a unique color based on scalar parameter in the range of 0-1.
 	// - Works off HSV color format, in this case Saturation and Value are 100% and Hue is dependant on 'scalar'
 	Vector4 GenColor(float scalar, float alpha = 1.0f);
@@ -51,6 +53,17 @@ namespace CommonUtils
 		float inverse_mass = 0.0f,			//requires physics_enabled = true
 		bool collidable = true,				//requires physics_enabled = true
 		bool dragable = true,
+		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	//Generates a default Cuboid object with the parameters specified
+	GameObject* BuildMazeNode(
+		const std::string& name,
+		const Vector3& pos,
+		const Vector3& halfdims,
+		Vector3* select_pos,
+		float inverse_mass = 0.0f,			//requires physics_enabled = true
+		bool collidable = true,				//requires physics_enabled = true
+		bool selectable = true,
 		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	GameObject* BuildCuboidObjectNoTexture(

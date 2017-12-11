@@ -29,6 +29,7 @@ public:
 	void DrawSearchHistory(const SearchHistory& history, float line_width);
 	void DrawRoute(vector<Vector3>, float line_width , int maze_size);
 	void DrawStartEndNodes(Vector3* start, Vector3* end);
+	Vector3 GetHalfDims() { return halfD; }
 
 
 protected:
@@ -57,7 +58,11 @@ protected:
 	bool*	flat_maze;	//[flat_maze_size x flat_maze_size]
 	uint	flat_maze_size;
 
+	Vector3 halfD;
+
 	vector<RenderNode*> nodes;
+
+	vector<GameObject*> ground_nodes;
 
 	RenderNode* startNode;
 

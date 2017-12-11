@@ -13,6 +13,10 @@ bool dragDataSet = false;
 Matrix3 dragDataInertia;
 float dragDataMass;
 
+void CommonUtils::SelectableObjectCallBack(GameObject* obj, Vector3* pos) {
+	*pos = (*obj->Render()->GetChildIteratorStart())->GetWorldTransform().GetPositionVector();
+}
+
 void CommonUtils::DragableObjectCallback(GameObject* obj, float dt, const Vector3& newWsPos, const Vector3& wsMovedAmount, bool stopDragging)
 {
 	if (obj->HasPhysics())
@@ -245,6 +249,42 @@ GameObject* CommonUtils::BuildCuboidObject(
 		);
 	}
 	
+	return obj;
+}
+
+GameObject* CommonUtils::BuildMazeNode(
+	const std::string& name,
+	const Vector3& pos,
+	const Vector3& halfdims,
+	Vector3* select_pos,
+	float inverse_mass,
+	bool collidable,
+	bool selectable,
+	const Vector4& color)
+{
+	//Due to the way SceneNode/RenderNode's were setup, we have to make a dummy node which has the mesh and scaling transform
+	// and a parent node that will contain the world transform/physics transform
+	RenderNode* rnode = new RenderNode();
+
+	RenderNode* dummy = new RenderNode(CommonMeshes::Cube(), color);
+	dummy->SetTransform(Matrix4::Scale(halfdims));
+	rnode->AddChild(dummy);
+
+	rnode->SetTransform(Matrix4::Translation(pos));
+	rnode->SetBoundingRadius(halfdims.Length());
+
+	PhysicsNode* pnode = NULL;
+
+	GameObject* obj = new GameObject(name, rnode, pnode);
+
+	if (selectable)
+	{
+		ScreenPicker::Instance()->RegisterNodeForMouseCallback(
+			dummy, //Dummy is the rendernode that actually contains the drawable mesh
+			std::bind(&SelectableObjectCallBack, obj, select_pos)
+		);
+	}
+
 	return obj;
 }
 

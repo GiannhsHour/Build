@@ -89,6 +89,7 @@ produce satisfactory results on the networked peers.
 
 
 
+
 const Vector3 status_color3 = Vector3(1.0f, 0.6f, 0.6f);
 const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_color3.z, 1.0f);
 
@@ -96,6 +97,7 @@ Net1_Client::Net1_Client(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
 	, avatar(NULL)
+	, grid_position(NULL)
 	
 {
 }
@@ -107,6 +109,9 @@ void Net1_Client::OnInitializeScene()
 	camera->SetPosition(Vector3(0.45f, 4.5f, 0.47f));
 	camera->SetPitch(-90);
 	draw_path = false;
+
+	grid_position = new Vector3(0, 0, 0);
+	
 	path_vec.clear();
 	//Initialize Client Network
 	if (network.Initialize(0))
@@ -128,6 +133,7 @@ void Net1_Client::OnInitializeScene()
 		false,									//Dragable by the user
 		Vector4(0.0f, 0.0f, 1.0f, 1.0f));	//Color
 
+
 }
 
 void Net1_Client::OnCleanupScene()
@@ -143,6 +149,24 @@ void Net1_Client::OnCleanupScene()
 	//Release network and all associated data/peer connections
 	network.Release();
 	serverConnection = NULL;
+}
+
+
+void Net1_Client::CreateGround(int maze_sz, Vector3 halfdims) {
+	
+	for (int i = 0; i < maze_sz; i++) {
+		for (int j = 0; j < maze_sz; j++) {
+			Vector3 grid_pos = Vector3(halfdims.x*0.5f, 0.0f, halfdims.z*0.5f) + Vector3(i*halfdims.x*1.5f, 0.0f, j*halfdims.z*1.5f);
+			this->AddGameObject(CommonUtils::BuildMazeNode(to_string(i)+" "+to_string(j),
+				grid_pos,	                            //Position leading to 0.25 meter overlap on faces, and more on diagonals
+				Vector3(halfdims.x*0.5f,0.1,halfdims.z*0.5f),				//Half dimensions
+				grid_position,									
+				0.0f,									//Infinite Mass
+				false,									//Has Collision Shape
+				true,									//selectable by the user
+				Vector4(1.0f, 0.0f, 0.0f, 1.0f)));
+		}
+	}
 }
 
 void Net1_Client::OnUpdateScene(float dt)
@@ -186,6 +210,11 @@ void Net1_Client::OnUpdateScene(float dt)
 			string data = "INIT " + to_string(maze_sz) + " " + to_string(dens).substr(0, 4) + "\n";
 			SendDataToServer(data);
 	}
+
+	if (Window::GetMouse()->DoubleClicked(MOUSE_LEFT)) {
+		cout << grid_position->x << " " << grid_position->y << " " << grid_position->z  << endl;
+	}
+	
 
 	if (draw_path) {
 		maze->DrawRoute(path_vec, 0.06f, maze_size);
@@ -279,6 +308,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				maze = new MazeRenderer(walls, maze_size);
 			    maze->Render()->SetTransform(maze_scalar);
 				this->AddGameObject(maze);
+				CreateGround(maze_size,maze->GetHalfDims());
 			}
 
 			else if (id == "ROUT") {

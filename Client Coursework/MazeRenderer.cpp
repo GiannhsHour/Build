@@ -55,6 +55,8 @@ MazeRenderer::~MazeRenderer()
 	}
 }
 
+
+
 //The search history draws from edges because they already store the 'to'
 // and 'from' of GraphNodes.
 void MazeRenderer::DrawSearchHistory(const SearchHistory& history, float line_width)
@@ -241,6 +243,7 @@ void MazeRenderer::Generate_BuildRenderNodes()
 
 //Turn walls into 3D Cuboids
 	const float scalar = 1.f / (float)flat_maze_size;
+	halfD = Vector3(scalar * 2, 1.0f, scalar * 2);
 	for (const WallDescriptor& w : wall_descriptors)
 	{
 		Vector3 start = Vector3(
@@ -261,7 +264,6 @@ void MazeRenderer::Generate_BuildRenderNodes()
 
 		Vector3 centre = (end + start) * 0.5f;
 		Vector3 halfDims = centre - start;
-		
 		cube = new RenderNode(mesh, wall_color);
 		cube->SetTransform(Matrix4::Translation(centre) * Matrix4::Scale(halfDims));
 		root->AddChild(cube);
