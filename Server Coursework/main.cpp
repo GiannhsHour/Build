@@ -87,6 +87,12 @@ void BroadcastData(char* data) {
 	enet_host_broadcast(server.m_pNetwork, 0, packet);
 }
 
+void SendDataToClient(string data, ENetPeer* peer) {
+
+	ENetPacket* packet = enet_packet_create(&data[0], data.length(), 0);
+	enet_peer_send(peer, 0, packet);
+}
+
 string extractId(enet_uint8* packet) {
 	stringstream ss;
 	for (int i = 0; i < 4; i++) {
