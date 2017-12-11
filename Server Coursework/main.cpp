@@ -144,6 +144,8 @@ int main(int arcg, char** argv)
 
 	printf("Server Initiated\n");
 
+	avatar = new PhysicsNode();
+	PhysicsEngine::Instance()->AddPhysicsObject(avatar);
 	//Initialise the PhysicsEngine
 	PhysicsEngine::Instance();
 
@@ -228,9 +230,8 @@ int main(int arcg, char** argv)
 					avatarIndex = 0;
 					avatar_cellpos.clear();
 					avatar_velocities.clear();
-					avatar = new PhysicsNode();
 					avatar->SetPosition(start->_pos);
-					PhysicsEngine::Instance()->AddPhysicsObject(avatar);
+					
 
 					search_as->FindBestPath(start, end);
 					final_path = search_as->GetFinalPath();
