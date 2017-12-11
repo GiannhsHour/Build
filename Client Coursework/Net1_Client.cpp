@@ -93,11 +93,22 @@ produce satisfactory results on the networked peers.
 const Vector3 status_color3 = Vector3(1.0f, 0.6f, 0.6f);
 const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_color3.z, 1.0f);
 
+Vector3 prev_position =   Vector3(100,100,100);
+bool sentStart = false;
+bool secondTime = false;
+
+//Coords to send for stand and end points 
+int startx;
+int starty;
+int endx;
+int endy;
+
 Net1_Client::Net1_Client(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
 	, avatar(NULL)
 	, grid_position(NULL)
+	, curr_avatar_pos(new Vector3(0,0,0))
 	
 {
 }
@@ -112,6 +123,7 @@ void Net1_Client::OnInitializeScene()
 
 	grid_position = new Vector3(0, 0, 0);
 	
+
 	path_vec.clear();
 	//Initialize Client Network
 	if (network.Initialize(0))
@@ -126,7 +138,7 @@ void Net1_Client::OnInitializeScene()
 	//Generate Simple Scene with a box that can be updated upon recieving server packets
 	avatar = CommonUtils::BuildCuboidObject("avatar",
 		Vector3(0,0,0),								//Position
-		Vector3(0.1f, 0.1f, 0.1f),				//Half dimensions
+		Vector3(0.05f, 0.5f, 0.05f),				//Half dimensions
 		false,									//Has Physics Object
 		0.5f,									//Infinite Mass
 		false,									//Has Collision Shape
@@ -159,12 +171,12 @@ void Net1_Client::CreateGround(int maze_sz, Vector3 halfdims) {
 			Vector3 grid_pos = Vector3(halfdims.x*0.5f, 0.0f, halfdims.z*0.5f) + Vector3(i*halfdims.x*1.5f, 0.0f, j*halfdims.z*1.5f);
 			this->AddGameObject(CommonUtils::BuildMazeNode(to_string(i)+" "+to_string(j),
 				grid_pos,	                            //Position leading to 0.25 meter overlap on faces, and more on diagonals
-				Vector3(halfdims.x*0.5f,0.1,halfdims.z*0.5f),				//Half dimensions
+				Vector3(halfdims.x,0.005f,halfdims.z),				//Half dimensions
 				grid_position,									
 				0.0f,									//Infinite Mass
 				false,									//Has Collision Shape
 				true,									//selectable by the user
-				Vector4(1.0f, 0.0f, 0.0f, 1.0f)));
+				Vector4(0.5f, 0.8f, 0.0f, 1.0f)));
 		}
 	}
 }
@@ -181,22 +193,7 @@ void Net1_Client::OnUpdateScene(float dt)
 		std::placeholders::_1);				// Where to place the first parameter
 	network.ServiceNetwork(dt, callback);
 
-	//Send start - end coords to server
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J)) {
-		if (maze_size > 0) {
-			int startx = rand() % maze_size;
-			int starty = rand() % maze_size;
 
-			int endx = rand() % maze_size;
-			int endy = rand() % maze_size;
-
-			string send = "CRDS " + to_string(startx) + " " + to_string(starty) + " " + to_string(0) + " "
-				+ to_string(endx) + " " + to_string(endy) + " " + to_string(0);
-			start = new Vector3(startx, starty, 0);
-			end = new Vector3(endx, endy, 0);
-			SendDataToServer(&send[0]);
-		}
-	}
 
 
 	//Send Init maze instructions to the server (maze size and density)
@@ -211,14 +208,36 @@ void Net1_Client::OnUpdateScene(float dt)
 			SendDataToServer(data);
 	}
 
-	if (Window::GetMouse()->DoubleClicked(MOUSE_LEFT)) {
-		cout << grid_position->x << " " << grid_position->y << " " << grid_position->z  << endl;
+	if (Window::GetMouse()->DoubleClicked(MOUSE_LEFT)&& !(prev_position == *grid_position)) {
+		*grid_position = Vector3((int)(grid_position->x * maze_size), (int)(grid_position->y * maze_size), (int)(grid_position->z * maze_size));
+		Sleep(200);
+			if (!sentStart) {
+				startx = grid_position->x;
+				starty = grid_position->z;
+				sentStart = true;
+			}
+			else {
+				endx = grid_position->x;
+				endy = grid_position->z;
+				
+				//send start point for second time, so it avatar will continue from where it was
+				if (!secondTime)	start = new Vector3(startx, starty, 0);
+				else {
+					start = curr_avatar_pos;
+				}
+				end = new Vector3(endx, endy, 0);
+				secondTime = true;
+				string send = "CRDS " + to_string(start->x) + " " + to_string(start->y) + " " + to_string(0) + " "
+					+ to_string(end->x) + " " + to_string(end->y) + " " + to_string(0);
+				SendDataToServer(&send[0]);
+			}
+			prev_position = *grid_position;
 	}
 	
 
 	if (draw_path) {
-		maze->DrawRoute(path_vec, 0.06f, maze_size);
-		maze->DrawStartEndNodes(start, end);
+		maze->DrawRoute(path_vec, 0.03f, maze_size);
+	//	maze->DrawStartEndNodes(start, end);
 	}
 
 		
@@ -304,7 +323,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 					walls[i] = data[i] == '1' ? true : false ;
 				}
 
-				maze_scalar = Matrix4::Scale(Vector3(1, 5.0f / float(maze_size), 1));
+				maze_scalar = Matrix4::Scale(Vector3(1, 5.0f / (float(maze_size)* 3.0f), 1));
 				maze = new MazeRenderer(walls, maze_size);
 			    maze->Render()->SetTransform(maze_scalar);
 				this->AddGameObject(maze);
@@ -312,6 +331,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 			}
 
 			else if (id == "ROUT") {
+
 				path_vec.clear();
 				draw_path = true;
 				stringstream ss;
@@ -343,6 +363,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 						ss >> p; y = stof(p);
 						ss >> p; z = stof(p);
 						Vector3 avatar_pos = Vector3(x, y, z);
+						*curr_avatar_pos = avatar_pos;
 						(*avatar->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, avatar))*Matrix4::Scale(Vector3(0.02f,0.02f,0.02f)));
 					}
 				}

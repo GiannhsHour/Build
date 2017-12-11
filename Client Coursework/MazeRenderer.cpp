@@ -104,7 +104,7 @@ void MazeRenderer::DrawRoute(vector<Vector3> final, float line_width, int maze_s
 			0.1f,
 			(final[i+1].y + 0.5f) * grid_scalar);
 
-		NCLDebug::DrawThickLine(start, end, line_width, CommonUtils::GenColor(0.8f + index * col_factor));
+		NCLDebug::DrawThickLine(start + Vector3(0,0.03f,0), end + Vector3(0, 0.03f, 0), line_width, CommonUtils::GenColor(0.8f + index * col_factor));
 		index += 1.0f;
 	}
 }

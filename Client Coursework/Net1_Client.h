@@ -62,6 +62,8 @@ protected:
 
 	Vector3* grid_position;
 
+	Vector3* curr_avatar_pos;
+
 	NetworkBase network;
 	ENetPeer*	serverConnection;
 	
