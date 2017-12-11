@@ -135,15 +135,7 @@ void Net1_Client::OnInitializeScene()
 		NCLDebug::Log("Network: Attempting to connect to server.");
 	}
 
-	//Generate Simple Scene with a box that can be updated upon recieving server packets
-	avatar = CommonUtils::BuildCuboidObject("avatar",
-		Vector3(0,0,0),								//Position
-		Vector3(0.05f, 0.5f, 0.05f),				//Half dimensions
-		false,									//Has Physics Object
-		0.5f,									//Infinite Mass
-		false,									//Has Collision Shape
-		false,									//Dragable by the user
-		Vector4(0.0f, 0.0f, 1.0f, 1.0f));	//Color
+
 
 
 }
@@ -336,19 +328,24 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				draw_path = true;
 				stringstream ss;
 				ss << data;
-				while (!ss.eof()) {
-					string p;
-					float x, y, z;
-					ss >> p; 
-					if (p != "") {
-						x = stof(p);
-						ss >> p; y = stof(p);
-						ss >> p; z = stof(p);
-						Vector3 node_pos = Vector3(x, y, z);
-						path_vec.push_back(node_pos);
+				string client_id;
+				ss >> client_id;
+				
+				if (client_id == to_string(evnt.peer->outgoingPeerID)) {
+					while (!ss.eof()) {
+						string p;
+						float x, y, z;
+						ss >> p;
+						if (p != "") {
+							x = stof(p);
+							ss >> p; y = stof(p);
+							ss >> p; z = stof(p);
+							Vector3 node_pos = Vector3(x, y, z);
+							path_vec.push_back(node_pos);
+						}
 					}
+				
 				}
-				this->AddGameObject(avatar);
 			
 			}
 			else if (id == "POSI") {
@@ -358,17 +355,43 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 					string p;
 					float x, y, z;
 					ss >> p;
+					string client_id = p;
+					ss >> p;
 					if (p != "") {
 						x = stof(p);
 						ss >> p; y = stof(p);
 						ss >> p; z = stof(p);
 						Vector3 avatar_pos = Vector3(x, y, z);
-						*curr_avatar_pos = avatar_pos;
-						(*avatar->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, avatar))*Matrix4::Scale(Vector3(0.02f,0.02f,0.02f)));
+						if (client_id == to_string(evnt.peer->outgoingPeerID))
+							*curr_avatar_pos = avatar_pos;
+						(*avatars[client_id]->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, avatars[client_id]))*Matrix4::Scale(Vector3(0.02f, 0.02f, 0.02f)));
 					}
 				}
+				
 			}
+			else if (id == "CONN") {
+				
+				stringstream ss;
+				ss << data;
+				string new_client_id;
+				ss >> new_client_id;
+				for (int i = 0; i < stoi(new_client_id)+1; i++) {
+					if (avatars[to_string(i)]) {
+						this->RemoveGameObject(avatars[to_string(i)]);
+					}
+					avatars[to_string(i)] = CommonUtils::BuildCuboidObject("avatar",
+						Vector3(0, 0, 0),								//Position
+						Vector3(0.05f, 0.5f, 0.05f),				//Half dimensions
+						false,									//Has Physics Object
+						0.5f,									//Infinite Mass
+						false,									//Has Collision Shape
+						false,									//Dragable by the user
+						Vector4(i*0.5f, 0.0f, 1.0f, 1.0f));	//Color 
+					this->AddGameObject(avatars[to_string(i)]);
 
+				}
+			
+			}
 			else
 			{   	
 				NCLERROR("Recieved Invalid Network Packet!");

@@ -63,14 +63,19 @@ bool* edges;
 int maze_size = 0;
 float maze_density = 0.0f;
 
-std::list<const GraphNode*> final_path;
-vector<Vector3> avatar_velocities;
-vector<Vector3> avatar_cellpos;
-int avatarIndex = 0;
 
-PhysicsNode* avatar;
-bool enable_avatar = false;
+struct Player {
+	std::list<const GraphNode*> final_path;
+	vector<Vector3> avatar_velocities;
+	vector<Vector3> avatar_cellpos;
+	int avatarIndex = 0;
+	PhysicsNode* avatar;
+	bool enable_avatar = false;
+	string peer_id;
+};
 
+std::map<ENetPeer*, Player*> players;
+std::map<ENetPeer*, Player*>::iterator players_it;
 
 
 void Win32_PrintAllAdapterIPAddresses();
@@ -118,17 +123,38 @@ string extractData(enet_uint8* packet, int length) {
 
 }
 
-void calculate_velocities() {
-	for (std::list<const GraphNode*>::iterator it = final_path.begin(); it != final_path.end(); ) {
+void calculate_velocities(ENetPeer* peer) {
+	for (std::list<const GraphNode*>::iterator it = players[peer]->final_path.begin(); it != players[peer]->final_path.end(); ) {
 		Vector3 startp = (*it)->_pos;
 		++it;
-		if (it != final_path.end()) {
+		if (it != players[peer]->final_path.end()) {
 			Vector3 endp = (*it)->_pos;
-			avatar_velocities.push_back(endp - startp);
+			players[peer]->avatar_velocities.push_back(endp - startp);
 		}
 	}
 
 	
+}
+
+void UpdatePlayerPositions() {
+	//Update position for all avatars;
+	string send = "POSI ";
+	for (players_it = players.begin(); players_it != players.end(); ++players_it) {
+		if ((*players_it).second->enable_avatar) {
+			if ((*players_it).second->avatarIndex < (*players_it).second->avatar_velocities.size()) {
+				(*players_it).second->avatar->SetLinearVelocity((*players_it).second->avatar_velocities[(*players_it).second->avatarIndex] * 2.0f);
+				float avatar_dist = ((*players_it).second->avatar->GetPosition() - (*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex + 1]).Length();
+				if (avatar_dist <= 0.1f) {
+					(*players_it).second->avatar->SetPosition((*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex + 1]);
+					(*players_it).second->avatarIndex++;
+				}
+				send += (*players_it).second->peer_id + " " + to_string((*players_it).second->avatar->GetPosition().x) + " " +
+					to_string((*players_it).second->avatar->GetPosition().y) + " " +
+					to_string((*players_it).second->avatar->GetPosition().z) + " ";			
+			}
+		}
+	}
+	BroadcastData(&send[0]);
 }
 
 int main(int arcg, char** argv)
@@ -150,8 +176,7 @@ int main(int arcg, char** argv)
 
 	printf("Server Initiated\n");
 
-	avatar = new PhysicsNode();
-	PhysicsEngine::Instance()->AddPhysicsObject(avatar);
+	
 	//Initialise the PhysicsEngine
 	PhysicsEngine::Instance();
 
@@ -170,9 +195,21 @@ int main(int arcg, char** argv)
 			
 			switch (evnt.type)
 			{
-			case ENET_EVENT_TYPE_CONNECT:
+			case ENET_EVENT_TYPE_CONNECT: {
 				printf("-%d Client Connected\n", evnt.peer->incomingPeerID);
+				Player *p = new Player();
+				p->enable_avatar = false;
+				players[evnt.peer] = p;
+				players[evnt.peer]->avatar = new PhysicsNode();
+				players[evnt.peer]->peer_id = to_string(evnt.peer->incomingPeerID);
+				PhysicsEngine::Instance()->AddPhysicsObject(players[evnt.peer]->avatar);
+
+
+
+				string send = "CONN " + to_string(evnt.peer->incomingPeerID);
+				BroadcastData(&send[0]);
 				break;
+			}
 
 			case ENET_EVENT_TYPE_RECEIVE: 
 			{
@@ -180,9 +217,11 @@ int main(int arcg, char** argv)
 				printf("\t Received data from client %d. Data length: %d \n", evnt.peer->incomingPeerID, evnt.packet->dataLength);
 				string id = extractId(evnt.packet->data);
 				string data = extractData(evnt.packet->data, evnt.packet->dataLength);
+				string client_id = to_string(evnt.peer->incomingPeerID);
 				
 				if (id == "INIT") {
-					enable_avatar = false;
+				
+				
 					stringstream ss;
 					string vals;
 					ss << data;
@@ -195,15 +234,14 @@ int main(int arcg, char** argv)
 					BroadcastData(&send[0]);
 
 					printf("\t Generating Maze... \n");
-				
 					generator.Generate(maze_size, maze_density);
 					maze_edges = maze_size * (maze_size - 1) * 2;
 					edges = new bool[maze_edges];
 					for (int i = 0; i < maze_edges; i++) {
 						edges[i] = (generator.allEdges[i]._iswall);
 					}
-
 					printf("\t Maze Generated!.\n");
+
 				}
 				else if (id == "OOKK") {
 					printf("\t Sending data to Clients!\n");
@@ -232,24 +270,25 @@ int main(int arcg, char** argv)
 					GraphNode* start = &generator.allNodes[indexs];
 					GraphNode* end = &generator.allNodes[indexe];
 					
-					enable_avatar = true;
-					avatarIndex = 0;
-					avatar_cellpos.clear();
-					avatar_velocities.clear();
-					avatar->SetPosition(start->_pos);
-					
+					players[evnt.peer]->enable_avatar = true;
+					players[evnt.peer]->avatarIndex = 0;
+					players[evnt.peer]->avatar_cellpos.clear();
+					players[evnt.peer]->avatar_velocities.clear();
+					players[evnt.peer]->avatar->SetPosition(start->_pos);
 
 					search_as->FindBestPath(start, end);
-					final_path = search_as->GetFinalPath();
-					string send = "ROUT ";
-					for (std::list<const GraphNode*>::iterator it = final_path.begin(); it != final_path.end(); it++) {
+					players[evnt.peer]->final_path = search_as->GetFinalPath();
+					string send = "ROUT " + to_string(evnt.peer->incomingPeerID) + " ";
+
+					for (std::list<const GraphNode*>::iterator it = players[evnt.peer]->final_path.begin(); it != players[evnt.peer]->final_path.end(); it++) {
 						send += to_string((*it)->_pos.x) + " " + to_string((*it)->_pos.y) + " " + to_string((*it)->_pos.z) + " ";
-						avatar_cellpos.push_back((*it)->_pos);
+						players[evnt.peer]->avatar_cellpos.push_back((*it)->_pos);
 					}
 					printf("\t Broadcasting final graph to clients.");
-					BroadcastData(&send[0]);
+				//	BroadcastData(&send[0]);
+					SendDataToClient(&send[0], evnt.peer);
 
-					calculate_velocities();
+					calculate_velocities(evnt.peer);
 				}
 				else
 				{
@@ -267,18 +306,7 @@ int main(int arcg, char** argv)
 
 		if (accum_time >= UPDATE_TIMESTEP) {
 			accum_time = 0.0f;
-			if (enable_avatar) {
-				if (avatarIndex < avatar_velocities.size()) {
-					avatar->SetLinearVelocity(avatar_velocities[avatarIndex]*2.0f);
-					float avatar_dist = (avatar->GetPosition() - avatar_cellpos[avatarIndex + 1]).Length();
-					if (avatar_dist <= 0.1f) {
-						avatar->SetPosition(avatar_cellpos[avatarIndex + 1]);
-						avatarIndex++;
-					}
-					string send = "POSI " + to_string(avatar->GetPosition().x) + " " + to_string(avatar->GetPosition().y) + " " + to_string(avatar->GetPosition().z);
-					BroadcastData(&send[0]);
-				}
-			}
+			UpdatePlayerPositions();
 		}
 		PhysicsEngine::Instance()->Update(dt);
 

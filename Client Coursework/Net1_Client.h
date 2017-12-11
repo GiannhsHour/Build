@@ -46,7 +46,7 @@ protected:
 	}
 
 
-
+	std::map<string, GameObject*> avatars;
 	GameObject* avatar;
 	Matrix4 maze_scalar;
 	MazeRenderer * maze;
