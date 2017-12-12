@@ -83,7 +83,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Maze.cpp" />
     <ClCompile Include="MazeGenerator.cpp" />
     <ClCompile Include="MazeRenderer.cpp" />
     <ClCompile Include="Net1_Client.cpp" />
@@ -91,7 +90,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HungryDinosaur.h" />
-    <ClInclude Include="Maze.h" />
     <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="MazeRenderer.h" />
     <ClInclude Include="Net1_Client.h" />

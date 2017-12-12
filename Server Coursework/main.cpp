@@ -95,7 +95,6 @@ void BroadcastData(char* data) {
 }
 
 void SendDataToClient(string data, ENetPeer* peer) {
-
 	ENetPacket* packet = enet_packet_create(&data[0], data.length(), 0);
 	enet_peer_send(peer, 0, packet);
 }
@@ -122,7 +121,6 @@ string extractData(enet_uint8* packet, int length) {
 		return res.substr(1);
 	}
 	else return "";
-
 }
 
 void calculate_velocities(ENetPeer* peer) {
@@ -224,7 +222,6 @@ int main(int arcg, char** argv)
 				
 				if (id == "INIT") {
 				
-				
 					stringstream ss;
 					string vals;
 					ss << data;
@@ -288,7 +285,7 @@ int main(int arcg, char** argv)
 						players[evnt.peer]->avatar_cellpos.push_back((*it)->_pos);
 					}
 					printf("\t Broadcasting final graph to clients.");
-				//	BroadcastData(&send[0]);
+		
 					SendDataToClient(&send[0], evnt.peer);
 
 					calculate_velocities(evnt.peer);

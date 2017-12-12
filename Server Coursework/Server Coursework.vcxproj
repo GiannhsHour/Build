@@ -83,10 +83,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EvilBall.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MazeGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EvilBall.h" />
     <ClInclude Include="HungryDinosaur.h" />
     <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="SearchAlgorithm.h" />
