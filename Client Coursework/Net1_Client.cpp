@@ -450,6 +450,8 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 	case ENET_EVENT_TYPE_DISCONNECT:
 		{
 			NCLDebug::Log(status_color3, "Network: Server has disconnected!");
+			serverConnection = network.ConnectPeer(127, 0, 0, 1, 1234);
+			NCLDebug::Log("Network: Attempting to connect to server.");
 		}
 		break;
 	}

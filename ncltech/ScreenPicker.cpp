@@ -303,7 +303,7 @@ void ScreenPicker::HandleObjectMouseLeave()
 	if (m_pCurrentlyHoverObject)
 	{
 		//Set color back to original object color
-		m_pCurrentlyHoverObject->_renderNode->SetColor(m_CurrentObjectBaseColor);
+		if(m_pCurrentlyHoverObject->_renderNode) m_pCurrentlyHoverObject->_renderNode->SetColor(m_CurrentObjectBaseColor);
 		m_pCurrentlyHoverObject = NULL;
 
 		Window::GetWindow().SetCursorStyle(CURSOR_STYLE_DEFAULT);
