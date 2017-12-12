@@ -45,14 +45,16 @@ protected:
 		return res.substr(1);
 	}
 
-
 	std::map<string, GameObject*> avatars;
+	std::map<string, GameObject*> enemies;
+
 	GameObject* avatar;
 	Matrix4 maze_scalar;
 	MazeRenderer * maze;
 
-	int maze_size = 0;
-	float maze_density = 0.0f;
+	int maze_size;
+	float maze_density;
+	int num_enem;
 	
 	vector<Vector3> path_vec;
 	bool draw_path;

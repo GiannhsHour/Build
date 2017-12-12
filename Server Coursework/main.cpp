@@ -42,6 +42,7 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 #include <ncltech\NetworkBase.h>
 #include "MazeGenerator.h"
 #include "SearchAStar.h"
+#include "EvilBall.h"
 #include <sstream>
 
 //Needed to get computer adapter IPv4 addresses via windows
@@ -65,6 +66,9 @@ float maze_density = 0.0f;
 
 int clients_connected = 0;
 
+EvilBall *b1 = NULL;
+vector<EvilBall*> enemies;
+int num_enem = 0;
 
 struct Player {
 	std::list<const GraphNode*> final_path;
@@ -132,8 +136,6 @@ void calculate_velocities(ENetPeer* peer) {
 			players[peer]->avatar_velocities.push_back(endp - startp);
 		}
 	}
-
-	
 }
 
 void UpdatePlayerPositions() {
@@ -152,9 +154,21 @@ void UpdatePlayerPositions() {
 					to_string((*players_it).second->avatar->GetPosition().y) + " " +
 					to_string((*players_it).second->avatar->GetPosition().z) + " ";			
 			}
+			else (*players_it).second->avatar->SetLinearVelocity(Vector3(0,0,0));
 		}
 	}
 	BroadcastData(&send[0]);
+}
+
+void SendEnemyPositions() {
+	if (enemies.size() > 0) {
+		string send = "ENEM ";
+		for (int i = 0; i < enemies.size(); i++) {
+			enemies[i]->Patrol();
+			send += enemies[i]->GetPositionAsString();
+		}
+		BroadcastData(&send[0]);
+	}
 }
 
 int main(int arcg, char** argv)
@@ -179,6 +193,7 @@ int main(int arcg, char** argv)
 	
 	//Initialise the PhysicsEngine
 	PhysicsEngine::Instance();
+
 
 	Win32_PrintAllAdapterIPAddresses();
 
@@ -221,7 +236,12 @@ int main(int arcg, char** argv)
 				string client_id = to_string(evnt.peer->incomingPeerID);
 				
 				if (id == "INIT") {
-				
+				     
+					for (int i = 0; i < enemies.size(); i++) {
+						delete enemies[i];
+					}
+					enemies.clear();
+
 					stringstream ss;
 					string vals;
 					ss << data;
@@ -229,7 +249,9 @@ int main(int arcg, char** argv)
 					maze_size = stoi(vals);
 					ss >> vals;
 					maze_density = stof(vals);
-					printf("\t Received maze size %d and density %f from client %d \n", maze_size, maze_density, evnt.peer->incomingPeerID);
+					ss >> vals;
+					num_enem = stoi(vals);
+					printf("\t Received maze size %d , density %f and enemies %d from client %d \n", maze_size, maze_density, num_enem, evnt.peer->incomingPeerID);
 					string send = id +" "+data;
 					BroadcastData(&send[0]);
 
@@ -241,6 +263,11 @@ int main(int arcg, char** argv)
 						edges[i] = (generator.allEdges[i]._iswall);
 					}
 					printf("\t Maze Generated!.\n");
+					for (int i = 0; i < num_enem; i++) {
+						EvilBall *b = new EvilBall(&generator, to_string(i));
+						b->EnableBall();
+						enemies.push_back(b);
+					}
 
 				}
 				else if (id == "OOKK") {
@@ -308,6 +335,7 @@ int main(int arcg, char** argv)
 		if (accum_time >= UPDATE_TIMESTEP) {
 			accum_time = 0.0f;
 			UpdatePlayerPositions();
+			SendEnemyPositions();	
 		}
 		PhysicsEngine::Instance()->Update(dt);
 

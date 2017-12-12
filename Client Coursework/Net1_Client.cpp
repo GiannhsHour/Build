@@ -192,14 +192,18 @@ void Net1_Client::OnUpdateScene(float dt)
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_I)) {
 			int maze_sz;
 			float dens;
+			int enem;
 			printf("Choose maze size: \n");
 			cin >> maze_sz;
 			printf("Choose density: \n");
 			cin >> dens;
-			string data = "INIT " + to_string(maze_sz) + " " + to_string(dens).substr(0, 4) + "\n";
+			printf("Choose number of enemies: \n");
+			cin >> enem;
+			string data = "INIT " + to_string(maze_sz) + " " + to_string(dens).substr(0, 4) + " " + to_string(enem) + "\n";
 			SendDataToServer(data);
 	}
 
+	//Send start end coords with left double click to the server
 	if (Window::GetMouse()->DoubleClicked(MOUSE_LEFT)&& !(prev_position == *grid_position)) {
 		*grid_position = Vector3((int)(grid_position->x * maze_size), (int)(grid_position->y * maze_size), (int)(grid_position->z * maze_size));
 		Sleep(200);
@@ -298,7 +302,9 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				maze_size = stoi(vals);
 				ss >> vals;
 				maze_density = stof(vals);
-				printf("\t Received size: %d and density %f from server \n", maze_size, maze_density);
+				ss >> vals;
+				num_enem = stoi(vals);
+				printf("\t Received size: %d, density %f and enemies %d from server \n", maze_size, maze_density, num_enem);
 				string response = "OOKK";
 				SendDataToServer(response);
 			}
@@ -319,6 +325,21 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				maze = new MazeRenderer(walls, maze_size);
 			    maze->Render()->SetTransform(maze_scalar);
 				this->AddGameObject(maze);
+				
+				for (int i = 0; i < num_enem; i++) {
+					if (enemies[to_string(i)]) {
+						this->RemoveGameObject(enemies[to_string(i)]);
+					}
+					enemies[to_string(i)] = CommonUtils::BuildSphereObject("avatar",
+						Vector3(0, 0.0f, 0),								//Position
+						0.05f,									//Half dimensions
+						false,									//Has Physics Object
+						0.5f,									//Infinite Mass
+						false,									//Has Collision Shape
+						false,									//Dragable by the user
+						Vector4(i*0.5f, 0.0f, 1.0f, 1.0f));	//Color 
+					this->AddGameObject(enemies[to_string(i)]);
+				}
 				CreateGround(maze_size,maze->GetHalfDims());
 			}
 
@@ -367,7 +388,24 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 						(*avatars[client_id]->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, avatars[client_id]))*Matrix4::Scale(Vector3(0.02f, 0.02f, 0.02f)));
 					}
 				}
-				
+			}
+			else if (id == "ENEM") {
+				stringstream ss;
+				ss << data;
+				while (!ss.eof()) {
+					string p;
+					float x, y, z;
+					ss >> p;
+					string enemy_id = p;
+					ss >> p;
+					if (p != "") {
+						x = stof(p);
+						ss >> p; y = stof(p);
+						ss >> p; z = stof(p);
+						Vector3 avatar_pos = Vector3(x, y, z);
+						(*enemies[enemy_id]->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, enemies[enemy_id]))*Matrix4::Scale(Vector3(0.02f, 0.02f, 0.02f)));
+					}
+				}
 			}
 			else if (id == "CONN") {
 				
@@ -390,9 +428,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 						false,									//Dragable by the user
 						Vector4(i*0.5f, 0.0f, 1.0f, 1.0f));	//Color 
 					this->AddGameObject(avatars[to_string(i)]);
-
 				}
-			
 			}
 			else
 			{   	
