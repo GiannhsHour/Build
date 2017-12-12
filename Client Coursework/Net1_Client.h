@@ -16,7 +16,7 @@ public:
 	virtual void OnInitializeScene() override;
 	virtual void OnCleanupScene() override;
 	virtual void OnUpdateScene(float dt) override;
-
+	
 
 	void ProcessNetworkEvent(const ENetEvent& evnt);
 
@@ -24,6 +24,8 @@ protected:
 	void SendDataToServer(string data);
 	Vector3 ConvertToWorldPos(Vector3 cellpos, int maze_sz, GameObject* obj);
 	void CreateGround(int maze_sz,Vector3 halfdims);
+
+	void GenerateMaze(string dt);
 
 	string extractId(enet_uint8* packet) {
 		stringstream ss;

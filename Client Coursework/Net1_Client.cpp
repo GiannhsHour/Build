@@ -155,6 +155,41 @@ void Net1_Client::OnCleanupScene()
 	serverConnection = NULL;
 }
 
+void Net1_Client::GenerateMaze(string dt) {
+	if (maze) {
+		this->RemoveGameObject(maze);
+	}
+	int maze_edges = maze_size*(maze_size - 1) * 2;
+	printf("\t Server created maze! Now rendering.. Number of edges = %d \n", maze_edges);
+	bool * walls = new bool[maze_edges];
+
+
+	for (int i = 0; i < maze_edges; i++) {
+		walls[i] = dt[i] == '1' ? true : false;
+	}
+
+	maze_scalar = Matrix4::Scale(Vector3(1, 5.0f / (float(maze_size)* 3.0f), 1));
+	maze = new MazeRenderer(walls, maze_size);
+	maze->Render()->SetTransform(maze_scalar);
+	this->AddGameObject(maze);
+
+	for (int i = 0; i < num_enem; i++) {
+		if (enemies[to_string(i)]) {
+			this->RemoveGameObject(enemies[to_string(i)]);
+		}
+		enemies[to_string(i)] = CommonUtils::BuildSphereObject("avatar",
+			Vector3(0, 0.0f, 0),								//Position
+			0.05f,									//Half dimensions
+			false,									//Has Physics Object
+			0.5f,									//Infinite Mass
+			false,									//Has Collision Shape
+			false,									//Dragable by the user
+			Vector4(i*0.5f, 0.0f, 1.0f, 1.0f));	//Color 
+		this->AddGameObject(enemies[to_string(i)]);
+	}
+	CreateGround(maze_size, maze->GetHalfDims());
+}
+
 
 void Net1_Client::CreateGround(int maze_sz, Vector3 halfdims) {
 	
@@ -309,38 +344,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				SendDataToServer(response);
 			}
 			else if (id == "MAZE") {
-				if (maze) {
-					this->RemoveGameObject(maze);
-				}
-				int maze_edges = maze_size*(maze_size - 1) * 2;
-				printf("\t Server created maze! Now rendering.. Number of edges = %d \n", maze_edges);
-				bool * walls = new bool[maze_edges];
-
-	
-				for (int i = 0; i < maze_edges; i++) {
-					walls[i] = data[i] == '1' ? true : false ;
-				}
-
-				maze_scalar = Matrix4::Scale(Vector3(1, 5.0f / (float(maze_size)* 3.0f), 1));
-				maze = new MazeRenderer(walls, maze_size);
-			    maze->Render()->SetTransform(maze_scalar);
-				this->AddGameObject(maze);
-				
-				for (int i = 0; i < num_enem; i++) {
-					if (enemies[to_string(i)]) {
-						this->RemoveGameObject(enemies[to_string(i)]);
-					}
-					enemies[to_string(i)] = CommonUtils::BuildSphereObject("avatar",
-						Vector3(0, 0.0f, 0),								//Position
-						0.05f,									//Half dimensions
-						false,									//Has Physics Object
-						0.5f,									//Infinite Mass
-						false,									//Has Collision Shape
-						false,									//Dragable by the user
-						Vector4(i*0.5f, 0.0f, 1.0f, 1.0f));	//Color 
-					this->AddGameObject(enemies[to_string(i)]);
-				}
-				CreateGround(maze_size,maze->GetHalfDims());
+				GenerateMaze(data);
 			}
 
 			else if (id == "ROUT") {
@@ -390,20 +394,22 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				}
 			}
 			else if (id == "ENEM") {
-				stringstream ss;
-				ss << data;
-				while (!ss.eof()) {
-					string p;
-					float x, y, z;
-					ss >> p;
-					string enemy_id = p;
-					ss >> p;
-					if (p != "") {
-						x = stof(p);
-						ss >> p; y = stof(p);
-						ss >> p; z = stof(p);
-						Vector3 avatar_pos = Vector3(x, y, z);
-						(*enemies[enemy_id]->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, enemies[enemy_id]))*Matrix4::Scale(Vector3(0.02f, 0.02f, 0.02f)));
+				if (num_enem > 0) {
+					stringstream ss;
+					ss << data;
+					while (!ss.eof()) {
+						string p;
+						float x, y, z;
+						ss >> p;
+						string enemy_id = p;
+						ss >> p;
+						if (p != "") {
+							x = stof(p);
+							ss >> p; y = stof(p);
+							ss >> p; z = stof(p);
+							Vector3 avatar_pos = Vector3(x, y, z);
+							(*enemies[enemy_id]->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, enemies[enemy_id]))*Matrix4::Scale(Vector3(0.02f, 0.02f, 0.02f)));
+						}
 					}
 				}
 			}
