@@ -404,11 +404,14 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 						string enemy_id = p;
 						ss >> p;
 						if (p != "") {
+							bool isAggresive = stoi(p);
+							ss >> p;
 							x = stof(p);
 							ss >> p; y = stof(p);
 							ss >> p; z = stof(p);
 							Vector3 avatar_pos = Vector3(x, y, z);
-							(*enemies[enemy_id]->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, enemies[enemy_id]))*Matrix4::Scale(Vector3(0.02f, 0.02f, 0.02f)));
+							if(isAggresive)  (*enemies[enemy_id]->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, enemies[enemy_id]))*Matrix4::Scale(Vector3(0.04f, 0.04f, 0.04f)));
+							else (*enemies[enemy_id]->Render()->GetChildIteratorStart())->SetTransform(Matrix4::Translation(ConvertToWorldPos(avatar_pos, maze_size, enemies[enemy_id]))*Matrix4::Scale(Vector3(0.02f, 0.02f, 0.02f)));
 						}
 					}
 				}

@@ -30,6 +30,8 @@ public:
 	void GeneratePath(bool random = true, const Vector3 player = Vector3(0,0,0));
 	void UpdatePosition();
 
+	bool isAggresive() { return aggressive; }
+
 	bool isInLineOfSight(Vector3 player);
 
 	//States
@@ -68,4 +70,7 @@ protected:
 	bool generate;
 	
 	float ac_time;
+
+	//chasing or patrolling
+	bool aggressive;
 };

@@ -12,9 +12,10 @@ EvilBall::EvilBall(MazeGenerator* gen, string identity)
 	, avatar(new PhysicsNode())
 	, reached_end(false)
 	, id(identity)
-	, maze_pos(Vector3(-1,-1, -1))
+	, maze_pos(Vector3(-1, -1, -1))
 	, ac_time(0)
 	, generate(false)
+	, aggressive(false)
 
 {
 	state_name = "patrol";
@@ -167,7 +168,7 @@ void EvilBall::Chase() {
 }
 
 void EvilBall::Patrol(vector<Player*>& players) {
-	
+	aggressive = false;
 	for (int i = 0; i < players.size(); i++) {
 		if (players[i]->enable_avatar) {
 
@@ -175,6 +176,7 @@ void EvilBall::Patrol(vector<Player*>& players) {
 				state_name = "chase";
 				chasing_player = players[i];
 				reached_end = true;
+				aggressive = true;
 				return;
 			}*/
 
@@ -183,6 +185,7 @@ void EvilBall::Patrol(vector<Player*>& players) {
 				state_name = "chase";
 				chasing_player = players[i];
 				reached_end = true;
+				aggressive = true;
 				return;
 			}
 		}
@@ -206,7 +209,7 @@ void EvilBall::UpdatePosition() {
 				avatarIndex++;
 				generate = true;
 			}
-			position = id + " " + to_string(avatar->GetPosition().x) + " " +
+			position = id + " " + to_string(aggressive) + " " + to_string(avatar->GetPosition().x) + " " +
 				to_string(avatar->GetPosition().y) + " " +
 				to_string(avatar->GetPosition().z) + " ";
 			maze_pos = avatar_cellpos[avatarIndex];
