@@ -13,6 +13,8 @@ EvilBall::EvilBall(MazeGenerator* gen, string identity)
 	, reached_end(false)
 	, id(identity)
 	, maze_pos(Vector3(-1,-1, -1))
+	, ac_time(0)
+	, generate(false)
 
 {
 	state_name = "patrol";
@@ -24,7 +26,7 @@ EvilBall::~EvilBall()
 }
 
 //Generate a random path to use for patrol
-void EvilBall::GenerateRandomPath() {
+void EvilBall::GeneratePath(bool random, const Vector3 player) {
 
 	//clear everything
 	enable_avatar = true;
@@ -36,22 +38,35 @@ void EvilBall::GenerateRandomPath() {
 	SearchAStar* search_as = new SearchAStar();
 	search_as->SetWeightings(1.0f, 1.0f);
 
-	if (!start) {
+	if (random) {
+		
+		if (!start) {
+			int x = rand() % maze_size;
+			int y = rand() % maze_size;
+
+			int indexs = y * maze_size + x;
+
+			start = &generator->allNodes[indexs];
+		}
+		else {
+			if (first_path_after_chase) {
+				start = &generator->allNodes[(int)(maze_pos.y * maze_size + maze_pos.x)];
+			}
+			else {
+				start = end;
+			}
+		}
+
 		int x = rand() % maze_size;
 		int y = rand() % maze_size;
 
 		int indexs = y * maze_size + x;
-	
-		start = &generator->allNodes[indexs];
+		end = &generator->allNodes[indexs];
 	}
-	else start = end;
-
-
-	int x = rand() % maze_size;
-	int y = rand() % maze_size;
-
-	int indexs = y * maze_size + x;
-	end = &generator->allNodes[indexs];
+	else {
+		start = &generator->allNodes[(int)(maze_pos.y * maze_size + maze_pos.x)];
+		end = &generator->allNodes[(int)((int)player.y * maze_size + (int)player.x)];
+	}
 
 	search_as->FindBestPath(start, end);
 	patrol_path = search_as->GetFinalPath();
@@ -74,6 +89,7 @@ void EvilBall::GenerateRandomPath() {
 	delete search_as;
 }
 
+// line of sight based chase
 bool EvilBall::isInLineOfSight(Vector3 player) {
 	bool iSeeYou = false;
 	int size = generator->GetSize();
@@ -120,43 +136,56 @@ bool EvilBall::isInLineOfSight(Vector3 player) {
 	return iSeeYou;
 }
 
-void EvilBall::Chase(Vector3 player) {
+void EvilBall::Chase() {
 	//clear everything
-	enable_avatar = true;
-	avatarIndex = 0;
-	avatar_cellpos.clear();
-	avatar_velocities.clear();
+	ac_time += 1.0f;
+	if ((chasing_player->cur_cell_pos - maze_pos).Length() > 4.0f) {
+		first_path_after_chase = true;
+		state_name = "patrol";
+		reached_end = true;
+		return;
+	}
+	cout << "Maze POS: " << maze_pos.x << " " << maze_pos.y << " " << maze_pos.z << endl;
+	cout << "Actual POS: " << avatar->GetPosition().x << " " << avatar->GetPosition().y << " " << avatar->GetPosition().z << endl;
+	if (generate) {
+		GeneratePath(false, chasing_player->cur_cell_pos);
+		ac_time = 0;
+	}
 
-	int maze_size = generator->GetSize();
-	SearchAStar* search_as = new SearchAStar();
-	search_as->SetWeightings(1.0f, 1.0f);
+	UpdatePosition();
+	
 }
 
-void EvilBall::Patrol(vector<Vector3>& player_pos) {
+void EvilBall::Patrol(vector<Player*>& players) {
 	
-	for (int i = 0; i < player_pos.size(); i++) {
-		//Line of sight instead of radius
+	for (int i = 0; i < players.size(); i++) {
+		if (players[i]->enable_avatar) {
+			if ((players[i]->cur_cell_pos - maze_pos).Length() < 4.0f) {
+				state_name = "chase";
+				chasing_player = players[i];
+				reached_end = true;
+				return;
+			}
+		}
+	//	Line of sight instead of radius
 	/*	if (isInLineOfSight(player_pos[i])) {
 			state_name = "chase";
 			reached_end = true;
 			return;
 		}*/
 
-		if ((player_pos[i] - maze_pos).Length() < 4.0f) {
-			cout << "Se Murizw" << endl;
-			state_name = "chase";
-			reached_end = true;
-			return;
-		}
+	
 	}
 
 	if (reached_end) {
-		GenerateRandomPath();
+		GeneratePath();
+		first_path_after_chase = false;
 	}
 	UpdatePosition();
 }
 
 void EvilBall::UpdatePosition() {
+	generate = false;
 	if (enable_avatar) {
 		if (avatarIndex < avatar_velocities.size()) {
 			avatar->SetLinearVelocity(avatar_velocities[avatarIndex] * 1.0f);
@@ -164,16 +193,18 @@ void EvilBall::UpdatePosition() {
 			if (avatar_dist <= 0.05f) {
 				avatar->SetPosition(avatar_cellpos[avatarIndex + 1]);
 				avatarIndex++;
+				generate = true;
 			}
 			position = id + " " + to_string(avatar->GetPosition().x) + " " +
 				to_string(avatar->GetPosition().y) + " " +
 				to_string(avatar->GetPosition().z) + " ";
 			maze_pos = avatar_cellpos[avatarIndex];
+			
 		}
 		else {
 			avatar->SetLinearVelocity(Vector3(0, 0, 0));
 			reached_end = true;
-		}
+		} 
 	}
 }
 

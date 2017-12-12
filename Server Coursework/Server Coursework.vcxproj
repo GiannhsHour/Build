@@ -91,6 +91,7 @@
     <ClInclude Include="EvilBall.h" />
     <ClInclude Include="HungryDinosaur.h" />
     <ClInclude Include="MazeGenerator.h" />
+    <ClInclude Include="MazePlayer.h" />
     <ClInclude Include="SearchAlgorithm.h" />
     <ClInclude Include="SearchAStar.h" />
     <ClInclude Include="SearchBreadthFirst.h" />

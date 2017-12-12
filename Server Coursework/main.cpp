@@ -44,6 +44,7 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 #include "SearchAStar.h"
 #include "EvilBall.h"
 #include <sstream>
+#include "MazePlayer.h"
 
 //Needed to get computer adapter IPv4 addresses via windows
 #include <iphlpapi.h>
@@ -70,18 +71,9 @@ EvilBall *b1 = NULL;
 vector<EvilBall*> enemies;
 int num_enem = 0;
 
-vector<Vector3> player_positions;
+vector<Player*> players_v;
 
 
-struct Player {
-	std::list<const GraphNode*> final_path;
-	vector<Vector3> avatar_velocities;
-	vector<Vector3> avatar_cellpos;
-	int avatarIndex = 0;
-	PhysicsNode* avatar;
-	bool enable_avatar = false;
-	string peer_id;
-};
 
 std::map<ENetPeer*, Player*> players;
 std::map<ENetPeer*, Player*>::iterator players_it;
@@ -142,7 +134,7 @@ void calculate_velocities(ENetPeer* peer) {
 }
 
 void UpdatePlayerPositions() {
-	player_positions.clear();
+	players_v.clear();
 	//Update position for all avatars;
 	string send = "POSI ";
 	for (players_it = players.begin(); players_it != players.end(); ++players_it) {
@@ -158,12 +150,14 @@ void UpdatePlayerPositions() {
 					to_string((*players_it).second->avatar->GetPosition().y) + " " +
 					to_string((*players_it).second->avatar->GetPosition().z) + " ";		
 				//store all players current position
-			
+				(*players_it).second->cur_cell_pos = (*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex];
 			}
 			else (*players_it).second->avatar->SetLinearVelocity(Vector3(0,0,0));
-			player_positions.push_back((*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex]);
+		//	player_positions.push_back(&(*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex]);
+			
 		}
-	
+		
+		players_v.push_back((*players_it).second);
 	}
 	BroadcastData(&send[0]);
 }
@@ -172,7 +166,11 @@ void UpdateEnemyPositions() {
 	if (enemies.size() > 0) {
 		string send = "ENEM ";
 		for (int i = 0; i < enemies.size(); i++) {
-			enemies[i]->Patrol(player_positions);
+			if (enemies[i]->GetStateName() == "patrol") {
+				enemies[i]->Patrol(players_v);
+			}
+			else enemies[i]->Chase();
+			
 			send += enemies[i]->GetPositionAsString();
 		}
 		BroadcastData(&send[0]);

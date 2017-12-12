@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "MazeGenerator.h"
 #include "SearchAStar.h"
+#include "MazePlayer.h"
 
 
 
@@ -26,14 +27,14 @@ public:
 
 	void EnableBall() { enable_avatar = true; }
 
-	void GenerateRandomPath();
+	void GeneratePath(bool random = true, const Vector3 player = Vector3(0,0,0));
 	void UpdatePosition();
 
 	bool isInLineOfSight(Vector3 player);
 
 	//States
-	void Patrol(vector<Vector3>& player_pos);
-	void Chase(Vector3 player);
+	void Patrol(vector<Player*>& player);
+	void Chase();
 
 protected:
 	//Global
@@ -45,7 +46,7 @@ protected:
 	string position;
 	string id;
 	
-	bool patrolling;
+
 
 	MazeGenerator* generator;
 
@@ -58,8 +59,13 @@ protected:
 	PhysicsNode* avatar;
 	bool enable_avatar;
 	string peer_id;
+
+	//player being chased
+	Player* chasing_player;
 	
 	bool reached_end;
+	bool first_path_after_chase;
+	bool generate;
 	
-
+	float ac_time;
 };
