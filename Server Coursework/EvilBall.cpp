@@ -138,8 +138,15 @@ bool EvilBall::isInLineOfSight(Vector3 player) {
 
 void EvilBall::Chase() {
 	//clear everything
-	ac_time += 1.0f;
-	if ((chasing_player->cur_cell_pos - maze_pos).Length() > 4.0f) {
+
+	//if ((chasing_player->cur_cell_pos - maze_pos).Length() > 4.0f) {
+	//	first_path_after_chase = true;
+	//	state_name = "patrol";
+	//	reached_end = true;
+	//	return;
+	//}
+
+	if (!isInLineOfSight(chasing_player->cur_cell_pos)) {
 		first_path_after_chase = true;
 		state_name = "patrol";
 		reached_end = true;
@@ -149,7 +156,6 @@ void EvilBall::Chase() {
 	cout << "Actual POS: " << avatar->GetPosition().x << " " << avatar->GetPosition().y << " " << avatar->GetPosition().z << endl;
 	if (generate) {
 		GeneratePath(false, chasing_player->cur_cell_pos);
-		ac_time = 0;
 	}
 
 	UpdatePosition();
@@ -160,21 +166,21 @@ void EvilBall::Patrol(vector<Player*>& players) {
 	
 	for (int i = 0; i < players.size(); i++) {
 		if (players[i]->enable_avatar) {
-			if ((players[i]->cur_cell_pos - maze_pos).Length() < 4.0f) {
+			/*if ((players[i]->cur_cell_pos - maze_pos).Length() < 4.0f) {
+				state_name = "chase";
+				chasing_player = players[i];
+				reached_end = true;
+				return;
+			}*/
+
+			//	Line of sight instead of radius
+			if (isInLineOfSight(players[i]->cur_cell_pos)) {
 				state_name = "chase";
 				chasing_player = players[i];
 				reached_end = true;
 				return;
 			}
 		}
-	//	Line of sight instead of radius
-	/*	if (isInLineOfSight(player_pos[i])) {
-			state_name = "chase";
-			reached_end = true;
-			return;
-		}*/
-
-	
 	}
 
 	if (reached_end) {
