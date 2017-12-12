@@ -136,9 +136,12 @@ bool EvilBall::isInLineOfSight(Vector3 player) {
 	return iSeeYou;
 }
 
+
+//Chase based on radius or line of sight. Only 1 way can be active at a given time;
 void EvilBall::Chase() {
 	//clear everything
 
+	//Uncomment to use radius based chase. Need to uncomment patrol too. 
 	//if ((chasing_player->cur_cell_pos - maze_pos).Length() > 4.0f) {
 	//	first_path_after_chase = true;
 	//	state_name = "patrol";
@@ -146,14 +149,15 @@ void EvilBall::Chase() {
 	//	return;
 	//}
 
+
+	//Uncomment to use line of sight based chase.  Need to uncomment patrol too.
 	if (!isInLineOfSight(chasing_player->cur_cell_pos)) {
 		first_path_after_chase = true;
 		state_name = "patrol";
 		reached_end = true;
 		return;
 	}
-	cout << "Maze POS: " << maze_pos.x << " " << maze_pos.y << " " << maze_pos.z << endl;
-	cout << "Actual POS: " << avatar->GetPosition().x << " " << avatar->GetPosition().y << " " << avatar->GetPosition().z << endl;
+
 	if (generate) {
 		GeneratePath(false, chasing_player->cur_cell_pos);
 	}
@@ -166,6 +170,7 @@ void EvilBall::Patrol(vector<Player*>& players) {
 	
 	for (int i = 0; i < players.size(); i++) {
 		if (players[i]->enable_avatar) {
+
 			/*if ((players[i]->cur_cell_pos - maze_pos).Length() < 4.0f) {
 				state_name = "chase";
 				chasing_player = players[i];
