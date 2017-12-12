@@ -27,10 +27,13 @@ public:
 	void EnableBall() { enable_avatar = true; }
 
 	void GenerateRandomPath();
+	void UpdatePosition();
+
+	bool isInLineOfSight(Vector3 player);
 
 	//States
-	void Patrol();
-	void Chase();
+	void Patrol(vector<Vector3>& player_pos);
+	void Chase(Vector3 player);
 
 protected:
 	//Global

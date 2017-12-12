@@ -70,6 +70,9 @@ EvilBall *b1 = NULL;
 vector<EvilBall*> enemies;
 int num_enem = 0;
 
+vector<Vector3> player_positions;
+
+
 struct Player {
 	std::list<const GraphNode*> final_path;
 	vector<Vector3> avatar_velocities;
@@ -139,6 +142,7 @@ void calculate_velocities(ENetPeer* peer) {
 }
 
 void UpdatePlayerPositions() {
+	player_positions.clear();
 	//Update position for all avatars;
 	string send = "POSI ";
 	for (players_it = players.begin(); players_it != players.end(); ++players_it) {
@@ -152,19 +156,23 @@ void UpdatePlayerPositions() {
 				}
 				send += (*players_it).second->peer_id + " " + to_string((*players_it).second->avatar->GetPosition().x) + " " +
 					to_string((*players_it).second->avatar->GetPosition().y) + " " +
-					to_string((*players_it).second->avatar->GetPosition().z) + " ";			
+					to_string((*players_it).second->avatar->GetPosition().z) + " ";		
+				//store all players current position
+			
 			}
 			else (*players_it).second->avatar->SetLinearVelocity(Vector3(0,0,0));
+			player_positions.push_back((*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex]);
 		}
+	
 	}
 	BroadcastData(&send[0]);
 }
 
-void SendEnemyPositions() {
+void UpdateEnemyPositions() {
 	if (enemies.size() > 0) {
 		string send = "ENEM ";
 		for (int i = 0; i < enemies.size(); i++) {
-			enemies[i]->Patrol();
+			enemies[i]->Patrol(player_positions);
 			send += enemies[i]->GetPositionAsString();
 		}
 		BroadcastData(&send[0]);
@@ -335,7 +343,7 @@ int main(int arcg, char** argv)
 		if (accum_time >= UPDATE_TIMESTEP) {
 			accum_time = 0.0f;
 			UpdatePlayerPositions();
-			SendEnemyPositions();	
+			UpdateEnemyPositions();	
 		}
 		PhysicsEngine::Instance()->Update(dt);
 
