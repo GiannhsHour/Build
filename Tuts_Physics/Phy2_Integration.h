@@ -4,12 +4,10 @@
 #include <ncltech\Scene.h>
 #include <ncltech\SceneManager.h>
 #include <ncltech\PhysicsEngine.h>
-#include <ncltech\DistanceConstraint.h>
 #include <nclgl\NCLDebug.h>
 #include <ncltech\GameObject.h>
 #include <ncltech\CommonMeshes.h>
 #include <ncltech\CommonUtils.h>
-#include <ncltech\GraphicsPipeline.h>
 
 class Phy2_Integration : public Scene
 {
@@ -58,7 +56,7 @@ public:
 			Vector3(10.0f, 0.1f, 2.f),				//Scale
 			false,									//No Physics Yet
 			0.0f,									//No Physical Mass Yet
-			true,									//No Collision Shape 
+			false,									//No Collision Shape 
 			false,									//Not Dragable By the user
 			Vector4(0.2f, 1.0f, 0.5f, 1.0f)));		//Color
 
@@ -94,30 +92,6 @@ public:
 			UpdateTrajectory(transform.GetPositionVector()); //Our cheeky injection to store physics engine position updates
 		});
 
-
-		//Create a projectile
-		RenderNode* sphereRender2 = new RenderNode();
-		sphereRender2->SetMesh(CommonMeshes::Sphere());
-		sphereRender2->SetTransform(Matrix4::Scale(Vector3(0.5f, 0.5f, 0.5f))); //No position! That is now all handled in PhysicsNode
-		sphereRender2->SetColor(Vector4(0.2f, 1.0f, 0.5f, 1.0f));
-		sphereRender2->SetBoundingRadius(1.0f);
-
-		m_Sphere2 = new GameObject("Sphere2");
-		m_Sphere2->SetRender(new RenderNode());
-		m_Sphere2->Render()->AddChild(sphereRender2);
-		m_Sphere2->SetPhysics(new PhysicsNode());
-		m_Sphere2->Physics()->SetInverseMass(1.f);
-		//Position, vel and acceleration all set in "ResetScene()"
-		this->AddGameObject(m_Sphere2);
-
-
-		//PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-		//	m_Sphere->Physics(),													//Physics Object A
-		//	m_Sphere2->Physics(),													//Physics Object B
-		//	m_Sphere->Physics()->GetPosition() + Vector3(0.0f, 0.0f, 0.0f),		//Attachment Position on Object A	-> Currently the far right edge
-		//	m_Sphere2->Physics()->GetPosition() + Vector3(-0.5f, -0.5f, -0.5f)));	//Attachment Position on Object B	-> Currently the far left edge 
-
-
 	//Setup starting values
 		ResetScene(PhysicsEngine::Instance()->GetUpdateTimestep());
 	}
@@ -140,48 +114,6 @@ public:
 		// - Rotation is in radians (so 2PI is 360 degrees), richard has provided a DegToRad() function in <nclgl\common.h> if you want as well.
 		m_Sphere->Physics()->SetOrientation(Quaternion());
 		m_Sphere->Physics()->SetAngularVelocity(Vector3(0.f, 0.f, -2.0f * PI));
-
-		//These values were worked out analytically by
-		// doing the integration over time. The ball (if everything works)
-		// should take 5 seconds to arc into the centre of the target.
-		m_Sphere2->Physics()->SetPosition(Vector3(-4.5f, 2.0f, 0.f));
-		m_Sphere2->Physics()->SetLinearVelocity(Vector3(0.f, 0.f, 0.0f));
-		m_Sphere2->Physics()->SetForce(Vector3(0.f, 0.f, 0.0f));
-
-		//Cause we can.. we will also spin the ball 1 revolution per second (5 full spins before hitting target)
-		// - Rotation is in radians (so 2PI is 360 degrees), richard has provided a DegToRad() function in <nclgl\common.h> if you want as well.
-		m_Sphere2->Physics()->SetOrientation(Quaternion());
-		m_Sphere2->Physics()->SetAngularVelocity(Vector3(0.f, 0.f, -0.0f * PI));
-	}
-
-	void spawn() {
-		//Create a projectile
-		RenderNode* sphereRender2 = new RenderNode();
-		sphereRender2->SetMesh(CommonMeshes::Sphere());
-		sphereRender2->SetTransform(Matrix4::Scale(Vector3(0.5f, 0.5f, 0.5f))); //No position! That is now all handled in PhysicsNode
-		sphereRender2->SetColor(Vector4(0.2f, 1.0f, 0.5f, 1.0f));
-		sphereRender2->SetBoundingRadius(1.0f);
-
-		m_Sphere3 = new GameObject("Sphere3");
-		m_Sphere3->SetRender(new RenderNode());
-		m_Sphere3->Render()->AddChild(sphereRender2);
-		m_Sphere3->SetPhysics(new PhysicsNode());
-		m_Sphere3->Physics()->SetInverseMass(1.f);
-	
-		Camera * camera = GraphicsPipeline::Instance()->GetCamera();
-		float yaw = camera->GetYaw();
-		float pitch = camera->GetPitch();
-		float fx, fz, fy;
-		m_Sphere3->Physics()->SetPosition(camera->GetPosition());
-		fx =  -sin(DegToRad(yaw));
-		fz =  -cos(DegToRad(yaw));
-		fy =   sin(DegToRad(pitch));
-		float absp = 1 - (abs(fy));
-
-		m_Sphere3->Physics()->SetForce(Vector3(0, -3 , 0));
-		m_Sphere3->Physics()->SetLinearVelocity((Vector3(fx * 15 , 2 + pitch * 0.5, fz * 15 )));
-		m_Sphere3->Physics()->SetAngularVelocity((Vector3(-5, 0, 0)));
-		this->AddGameObject(m_Sphere3);
 	}
 
 	virtual void OnUpdateScene(float dt) override
@@ -206,7 +138,6 @@ public:
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2))	ResetScene(1.0f / 15.0f);
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_3))	ResetScene(1.0f / 30.0f);
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_4))	ResetScene(1.0f / 60.0f);
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_V))	spawn();
 	
 
 	//Draw the trajectory:-	
@@ -232,14 +163,12 @@ public:
 		
 		if (m_Sphere->Physics()->GetPosition().y < 0.0f)
 		{
-		//	PhysicsEngine::Instance()->SetPaused(true);
+			PhysicsEngine::Instance()->SetPaused(true);
 		}
 	}
 
 private:
 	Mesh*					m_TargetMesh;
 	GameObject*				m_Sphere;
-	GameObject*				m_Sphere2;
-	GameObject*				m_Sphere3;
 	std::vector<Vector3>	m_TrajectoryPoints;
 };

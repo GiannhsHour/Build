@@ -6,7 +6,6 @@
 #include <ncltech\SceneManager.h>
 #include <ncltech\PhysicsEngine.h>
 #include <ncltech\DistanceConstraint.h>
-#include <ncltech\CollisionDetectionSAT.h>
 #include <ncltech\CommonUtils.h>
 
 class Phy4_ColDetection : public Scene
@@ -49,14 +48,14 @@ public:
 				true,									//Dragable by the user
 				CommonUtils::GenColor(0.45f, 0.5f)));	//Color
 
-			this->AddGameObject(CommonUtils::BuildSphereObject("orb_1",
+			this->AddGameObject(CommonUtils::BuildSphereObject("",
 				ss_pos,									//Position
 				0.5f,									//Radius
 				true,									//Has Physics Object
 				0.0f,									//Infinite Mass
 				true,									//Has Collision Shape
 				true,									//Dragable by the user
-				CommonUtils::GenColor(1.0f, 0.5f)));	//Color
+				CommonUtils::GenColor(0.5f, 1.0f)));	//Color
 		}
 
 		//Create Sphere-Cuboid Manifold Test
@@ -102,29 +101,14 @@ public:
 				CommonUtils::GenColor(0.5f, 1.0f)));	//Color
 		}
 
-		GameObject* ball1 = this->FindGameObject("orbiting_sphere1");
-		GameObject* ball2 = this->FindGameObject("orb_1");
-		sphereColDetect = new CollisionDetectionSAT();
-		
-	//	sphereColDetect->BeginNewPair(ball1->Physics(), ball2->Physics(), ball1->Physics()->GetCollisionShape(), ball2->Physics()->GetCollisionShape());
-
 	}
-
 
 	float m_AccumTime;
 	virtual void OnUpdateScene(float dt) override
 	{
 		Scene::OnUpdateScene(dt);
-		GameObject* ball1 = this->FindGameObject("orbiting_sphere1");
-		GameObject* ball2 = this->FindGameObject("orb_1");
-	/*	if (sphereColDetect->AreColliding()) {
-			(*ball1->Render()->GetChildIteratorStart())->SetColor(Vector4(1,0,0,0.5f));
-			(*ball2->Render()->GetChildIteratorStart())->SetColor(Vector4(1,0,0,0.5f));
-		}
-		else {
-			(*ball1->Render()->GetChildIteratorStart())->SetColor(Vector4(0, 1, 0, 1.0f));
-			(*ball2->Render()->GetChildIteratorStart())->SetColor(Vector4(0, 1, 0, 1.0f));
-		}*/
+
+
 		//Update Rotating Objects!
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_1))
 		{
@@ -138,10 +122,9 @@ public:
 			{
 				//Move orbiting sphere1 around centre object at 45 degrees per second with an orbiting radius of 75cm
 				orbiting_sphere1->Physics()->SetPosition(Vector3(
-					ss_pos.x + cost * 1.75f,
+					ss_pos.x + cost * 0.75f,
 					ss_pos.y,
 					ss_pos.z + sint * 0.75f));
-
 			}
 
 			GameObject* orbiting_sphere2 = this->FindGameObject("orbiting_sphere2");
@@ -149,7 +132,7 @@ public:
 			{
 				//Move orbiting sphere2 around centre object at 45 degrees per second with an orbiting radius of 90cm
 				orbiting_sphere2->Physics()->SetPosition(Vector3(
-					sc_pos.x + cost * 1.9f,
+					sc_pos.x + cost * 0.9f,
 					sc_pos.y,
 					sc_pos.z + sint * 0.9f));
 			}
@@ -159,7 +142,7 @@ public:
 			{
 				//Move orbiting sphere2 around centre object at 45 degrees per second with an orbiting radius of 90cm
 				rotating_cuboid1->Physics()->SetPosition(Vector3(
-					cc_pos.x + cost * 1.9f,
+					cc_pos.x + cost * 0.9f,
 					cc_pos.y,
 					cc_pos.z + sint * 0.9f));
 			}
@@ -175,7 +158,4 @@ public:
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "--- Controls ---");
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "    Hold [1] to rotate objects");
 	}
-
-	private: 
-		CollisionDetectionSAT * sphereColDetect;
 };

@@ -241,7 +241,7 @@ void Net1_Client::OnUpdateScene(float dt)
 	//Send start end coords with left double click to the server
 	if (Window::GetMouse()->DoubleClicked(MOUSE_LEFT)&& !(prev_position == *grid_position)) {
 		*grid_position = Vector3((int)(grid_position->x * maze_size), (int)(grid_position->y * maze_size), (int)(grid_position->z * maze_size));
-		Sleep(200);
+		Sleep(120);
 			if (!sentStart) {
 				startx = grid_position->x;
 				starty = grid_position->z;

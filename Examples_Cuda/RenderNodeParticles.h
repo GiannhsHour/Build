@@ -18,7 +18,7 @@
 //       before copying particle data.
 
 
-#include "../nclgl/RenderNode.h"
+#include <nclgl\RenderNode.h>
 
 class RenderNodeParticles : public RenderNode
 {

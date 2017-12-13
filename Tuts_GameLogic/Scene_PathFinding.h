@@ -237,7 +237,6 @@ public:
 		NCLDebug::DrawTextWsNDT(pos_maze2 - Vector3(0, 0, 3.1f), STATUS_TEXT_SIZE, TEXTALIGN_CENTRE, Vector4(0, 0, 0, 1), "Breadth First");
 		NCLDebug::DrawTextWsNDT(pos_maze3 + Vector3(0, 0, 3.1f), STATUS_TEXT_SIZE, TEXTALIGN_CENTRE, Vector4(0, 0, 0, 1), "A-Star");
 
-        //draw here
 		mazes[0]->DrawSearchHistory(search_df->GetSearchHistory(), 2.5f / float(grid_size));
 		mazes[1]->DrawSearchHistory(search_bf->GetSearchHistory(), 2.5f / float(grid_size));
 		mazes[2]->DrawSearchHistory(search_as->GetSearchHistory(), 2.5f / float(grid_size));

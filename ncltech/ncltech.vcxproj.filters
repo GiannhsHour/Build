@@ -70,7 +70,7 @@
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
     <ClCompile Include="OcTree.cpp">
-      <Filter>Source Files\Physics</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -135,10 +135,10 @@
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="AABB.h">
-      <Filter>Header Files\Physics</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OcTree.h">
-      <Filter>Header Files\Physics</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
