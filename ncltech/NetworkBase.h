@@ -38,7 +38,7 @@ Description:
 *//////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include <enet\enet.h>
+#include "../ExternalLibs/ENET/include/enet/enet.h"
 #include <stdint.h>
 #include <functional>
 

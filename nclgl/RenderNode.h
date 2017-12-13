@@ -27,7 +27,20 @@ _-_-_-_-_-_-_-""  ""
 class RenderNode	{
 public:
 	 RenderNode(Mesh*m = NULL, Vector4 colour = Vector4(1,1,1,1));
-	~RenderNode(void);
+	virtual ~RenderNode(void);
+
+	virtual bool IsRenderable()
+	{
+		return (this->mesh != NULL);
+	}
+
+	virtual void DrawOpenGL(bool isShadowPass)
+	{
+		if (this->mesh)
+			this->mesh->Draw();
+	}
+
+
 
 	void			SetTransform(const Matrix4 &matrix) { transform = matrix;}
 	const Matrix4&	GetTransform() const				{ return transform;}

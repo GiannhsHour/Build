@@ -26,10 +26,10 @@ _-_-_-_-_-_-_-""  ""
 
 
 
-#include <GL\glew.h>
-#include <GL\wglew.h>
+#include "../ExternalLibs/GLEW/include/GL/glew.h"
+#include "../ExternalLibs/GLEW/include/GL/wglew.h"
 
-#include <SOIL.h>
+#include "../ExternalLibs/SOIL/include/SOIL.h" 
 
 #include "Vector4.h"
 #include "Vector3.h"

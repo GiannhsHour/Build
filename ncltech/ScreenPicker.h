@@ -36,7 +36,7 @@ which can be extended (with the new physics collision shapes) to provide an accu
 #include <nclgl\TSingleton.h>
 #include <nclgl\RenderNode.h>
 #include <nclgl\Shader.h>
-#include <GL\glew.h>
+#include "../ExternalLibs/GLEW/include/GL/glew.h"
 
 //Our texture only stores 16bit unsigned shorts, so has a hard limit on the number of values it can store. 
 //  Hopefully you will never be able to trigger this value though. 

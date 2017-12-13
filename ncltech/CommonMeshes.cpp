@@ -1,7 +1,7 @@
 #include "CommonMeshes.h"
 #include <nclgl\NCLDebug.h>
 #include <nclgl\OBJMesh.h>
-#include <SOIL.h>
+#include "../ExternalLibs/SOIL/include/SOIL.h" 
 
 Mesh* CommonMeshes::m_pCube		= NULL;
 Mesh* CommonMeshes::m_pSphere	= NULL;
