@@ -103,6 +103,9 @@ int starty;
 int endx;
 int endy;
 
+
+bool chaseRadius = true;
+
 Net1_Client::Net1_Client(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
@@ -226,6 +229,13 @@ void Net1_Client::OnUpdateScene(float dt)
 
 
 
+	//Send Init maze instructions to the server (maze size and density)
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_E)) {
+		string data = "CHSE \n";
+		chaseRadius = !chaseRadius;
+		SendDataToServer(data);
+	}
+
 
 	//Send Init maze instructions to the server (maze size and density)
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_I)) {
@@ -290,6 +300,7 @@ void Net1_Client::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(status_color, "Network Traffic");
 	NCLDebug::AddStatusEntry(status_color, "    Incoming: %5.2fKbps", network.m_IncomingKb);
 	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);
+	NCLDebug::AddStatusEntry(status_color, "    EvilBall Chase Mode: %s", chaseRadius ? "Radius" : "Line of Sight");
 }
 
 

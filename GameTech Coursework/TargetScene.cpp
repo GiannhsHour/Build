@@ -29,6 +29,7 @@ void TargetScene::OnInitializeScene()
 	// texture from http://naveensabesan.blogspot.co.uk/2012/08/cosco.html
 	boardTex = SOIL_load_OGL_texture(TEXTUREDIR"board.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
 
+	//Create basket net.
 	const int dims = 30;
 	const int dimsx = dims;
 	const int dimsz = dims  * 0.25f;
@@ -67,6 +68,7 @@ void TargetScene::OnInitializeScene()
 	create_ball_cloth(floor_pos + Vector3(0, 5, -5.5f), Vector3(0.5f, 0.5f, 0.5f), 0.05f);
 	basket = AABB(floor_pos + Vector3(0, 4.5, -5.5f), 0.1f);
 
+	//Create dinstance constraints for basket net.
 	for (int i = 0; i < dimsx; i++) {
 		for (int j = 0; j < dimsz; j++) {
 			int indexi = i - 1;
@@ -159,6 +161,7 @@ void TargetScene::OnInitializeScene()
 
 }
 
+//Draw basket net (soft body)
 void TargetScene::draw() {
 
 	for (int i = 0; i < objects.size(); i++) {
@@ -188,10 +191,11 @@ bool TargetScene::boardCollisionCheck(PhysicsNode* self, PhysicsNode* collidingO
 	return false;
 }
 
+
+//Spawn a basketball
 void TargetScene::spawn() {
 	{
-
-		//Create a projectile
+		
 		Camera * camera = GraphicsPipeline::Instance()->GetCamera();
 		float yaw = camera->GetYaw();
 		float pitch = camera->GetPitch();
@@ -247,6 +251,7 @@ void TargetScene::drawBasket() {
 	NCLDebug::DrawThickLine(c3, c5, 0.1f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
 }
 
+//Check AABB for intersection with ball (used to determine if scored).
 void TargetScene::checkBasketballs() {
 	for (int i = 0; i < basketballs.size(); i++) {
 		if (basket.containsObject(basketballs[i])) {
@@ -264,7 +269,7 @@ void TargetScene::checkBasketballs() {
 }
 
 
-
+// Draw score in middle of the screen (orthographic)
 void TargetScene::drawScore(float time) {
 	for(int i = 0; i< scoresTime.size(); i++){
 		if (scoresTime[i] > 0) {

@@ -326,6 +326,10 @@ int main(int arcg, char** argv)
 					}
 					BroadcastData(&send[0]);
 				}
+				//Change chase mode
+				else if (id == "CHSE") {
+					EvilBall::ToggleChase();
+				}
 				//Send the client the final path to draw and render (based on a star)
 				else if (id == "CRDS") {
 					printf("\t Received coords for start and end point: %s\n", data.c_str());

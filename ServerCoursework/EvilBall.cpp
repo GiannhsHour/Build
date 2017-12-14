@@ -2,6 +2,7 @@
 #include <ncltech\Scene.h>
 
 
+bool EvilBall::radiusChase = true;
 EvilBall::EvilBall(MazeGenerator* gen, string identity)
 	: GameObject("evil")
 	, generator(gen)
@@ -26,7 +27,7 @@ EvilBall::~EvilBall()
 {
 }
 
-//Generate a random path to use for patrol
+//Generate a random path to use for patrol, or chase a player (useful in radius based chase)
 void EvilBall::GeneratePath(bool random, const Vector3 player) {
 
 	//clear everything
@@ -90,7 +91,7 @@ void EvilBall::GeneratePath(bool random, const Vector3 player) {
 	delete search_as;
 }
 
-// line of sight based chase
+// Line of sight based chase
 bool EvilBall::isInLineOfSight(Vector3 player) {
 	bool iSeeYou = false;
 	int size = generator->GetSize();
@@ -142,22 +143,23 @@ bool EvilBall::isInLineOfSight(Vector3 player) {
 void EvilBall::Chase() {
 	//clear everything
 
-	//Uncomment to use radius based chase. Need to uncomment patrol too. 
-	//if ((chasing_player->cur_cell_pos - maze_pos).Length() > 4.0f) {
-	//	first_path_after_chase = true;
-	//	state_name = "patrol";
-	//	reached_end = true;
-	//	return;
-	//}
-
-
-	//Uncomment to use line of sight based chase.  Need to uncomment patrol too.
-	if (!isInLineOfSight(chasing_player->cur_cell_pos)) {
-		first_path_after_chase = true;
-		state_name = "patrol";
-		reached_end = true;
-		return;
+	if (radiusChase) {
+		if ((chasing_player->cur_cell_pos - maze_pos).Length() > 4.0f) {
+			first_path_after_chase = true;
+			state_name = "patrol";
+			reached_end = true;
+			return;
+		}
 	}
+	else {
+		if (!isInLineOfSight(chasing_player->cur_cell_pos)) {
+			first_path_after_chase = true;
+			state_name = "patrol";
+			reached_end = true;
+			return;
+		}
+	}
+	
 
 	if (generate) {
 		GeneratePath(false, chasing_player->cur_cell_pos);
@@ -167,27 +169,30 @@ void EvilBall::Chase() {
 	
 }
 
+//Patrol State
 void EvilBall::Patrol(vector<Player*>& players) {
 	aggressive = false;
 	for (int i = 0; i < players.size(); i++) {
 		if (players[i]->enable_avatar) {
-
-			/*if ((players[i]->cur_cell_pos - maze_pos).Length() < 4.0f) {
-				state_name = "chase";
-				chasing_player = players[i];
-				reached_end = true;
-				aggressive = true;
-				return;
-			}*/
-
-			//	Line of sight instead of radius
-			if (isInLineOfSight(players[i]->cur_cell_pos)) {
-				state_name = "chase";
-				chasing_player = players[i];
-				reached_end = true;
-				aggressive = true;
-				return;
+			if (radiusChase) {
+				if ((players[i]->cur_cell_pos - maze_pos).Length() < 4.0f) {
+					state_name = "chase";
+					chasing_player = players[i];
+					reached_end = true;
+					aggressive = true;
+					return;
+				}
 			}
+			else{
+				if (isInLineOfSight(players[i]->cur_cell_pos)) {
+					state_name = "chase";
+					chasing_player = players[i];
+					reached_end = true;
+					aggressive = true;
+					return;
+				}
+			}
+		
 		}
 	}
 

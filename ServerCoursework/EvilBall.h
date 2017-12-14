@@ -34,6 +34,8 @@ public:
 
 	bool isInLineOfSight(Vector3 player);
 
+	static void ToggleChase() { radiusChase = !radiusChase; }
+
 	//States
 	void Patrol(vector<Player*>& player);
 	void Chase();
@@ -73,4 +75,6 @@ protected:
 
 	//chasing or patrolling
 	bool aggressive;
+
+	static bool radiusChase;
 };
