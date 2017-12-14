@@ -173,10 +173,12 @@ void Net1_Client::GenerateMaze(string dt) {
 	maze->Render()->SetTransform(maze_scalar);
 	this->AddGameObject(maze);
 
-	for (int i = 0; i < num_enem; i++) {
+	for (int i = 0; i < enemies.size(); i++) {
 		if (enemies[to_string(i)]) {
 			this->RemoveGameObject(enemies[to_string(i)]);
 		}
+	}
+	for (int i = 0; i < num_enem; i++) {
 		enemies[to_string(i)] = CommonUtils::BuildSphereObject("avatar",
 			Vector3(0, 0.0f, 0),								//Position
 			0.05f,									//Half dimensions
@@ -241,7 +243,7 @@ void Net1_Client::OnUpdateScene(float dt)
 	//Send start end coords with left double click to the server
 	if (Window::GetMouse()->DoubleClicked(MOUSE_LEFT)&& !(prev_position == *grid_position)) {
 		*grid_position = Vector3((int)(grid_position->x * maze_size), (int)(grid_position->y * maze_size), (int)(grid_position->z * maze_size));
-		Sleep(120);
+		Sleep(100);
 			if (!sentStart) {
 				startx = grid_position->x;
 				starty = grid_position->z;

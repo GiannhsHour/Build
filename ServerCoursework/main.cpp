@@ -123,12 +123,48 @@ string extractData(enet_uint8* packet, int length) {
 }
 
 void calculate_velocities(ENetPeer* peer) {
-	for (std::list<const GraphNode*>::iterator it = players[peer]->final_path.begin(); it != players[peer]->final_path.end(); ) {
-		Vector3 startp = (*it)->_pos;
-		++it;
-		if (it != players[peer]->final_path.end()) {
-			Vector3 endp = (*it)->_pos;
-			players[peer]->avatar_velocities.push_back(endp - startp);
+	for (int i = 0; i < players[peer]->avatar_cellpos.size(); i++) {
+	
+		Vector3 startp = players[peer]->avatar_cellpos[i];
+	
+		if ( i < players[peer]->avatar_cellpos.size()-1) {
+			Vector3 endp = players[peer]->avatar_cellpos[i+1];
+			Vector3 veloc = endp - startp;
+			if (abs(veloc.x) < 1 && abs(veloc.y) == 0) {
+				if (veloc.x < 0) veloc.x == -1;
+				else veloc.x = 1;
+			}
+			else if (abs(veloc.y) < 1 && abs(veloc.x) == 0) {
+				if (veloc.y < 0) veloc.y == -1;
+				else veloc.y = 1;
+			}
+			players[peer]->avatar_velocities.push_back(veloc);
+			
+		}
+		
+	}
+
+
+}
+
+//Based on Damianos Gouzgouris implementation for smooth transition after giving new coordinates to the server.
+void SmoothTransition(Player* player) {
+	if (player->avatar_cellpos.size() > 1) {
+		if (player->avatar_cellpos[0].x !=  player->avatar_cellpos[1].x) {
+			if ((player->avatar->GetPosition().x < player->avatar_cellpos[0].x) == (player->avatar->GetPosition().x > player->avatar_cellpos[1].x)) {
+				player->avatar_cellpos[0] = player->avatar->GetPosition();
+			}
+			else {
+				player->avatar_cellpos.insert(player->avatar_cellpos.begin(), player->avatar->GetPosition());
+			}
+		}
+		else if (player->avatar_cellpos[0].y != player->avatar_cellpos[1].y) {
+			if ((player->avatar->GetPosition().y < player->avatar_cellpos[0].y) == (player->avatar->GetPosition().y > player->avatar_cellpos[1].y)) {
+				player->avatar_cellpos[0] = player->avatar->GetPosition();
+			}
+			else {
+				player->avatar_cellpos.insert(player->avatar_cellpos.begin(), player->avatar->GetPosition());
+			}
 		}
 	}
 }
@@ -140,7 +176,7 @@ void UpdatePlayerPositions() {
 	for (players_it = players.begin(); players_it != players.end(); ++players_it) {
 		if ((*players_it).second->enable_avatar) {
 			if ((*players_it).second->avatarIndex < (*players_it).second->avatar_velocities.size()) {
-				(*players_it).second->avatar->SetLinearVelocity((*players_it).second->avatar_velocities[(*players_it).second->avatarIndex] * 2.0f);
+				(*players_it).second->avatar->SetLinearVelocity((*players_it).second->avatar_velocities[(*players_it).second->avatarIndex] * 1.5f);
 				float avatar_dist = ((*players_it).second->avatar->GetPosition() - (*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex + 1]).Length();
 				if (avatar_dist <= 0.1f) {
 					(*players_it).second->avatar->SetPosition((*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex + 1]);
@@ -153,7 +189,7 @@ void UpdatePlayerPositions() {
 				(*players_it).second->cur_cell_pos = (*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex];
 			}
 			else (*players_it).second->avatar->SetLinearVelocity(Vector3(0,0,0));
-		//	player_positions.push_back(&(*players_it).second->avatar_cellpos[(*players_it).second->avatarIndex]);
+
 			
 		}
 		
@@ -302,26 +338,38 @@ int main(int arcg, char** argv)
 
 					GraphNode* start = &generator.allNodes[indexs];
 					GraphNode* end = &generator.allNodes[indexe];
-					
+
+					bool has_velocity = false;
+					if (players[evnt.peer]->avatar_cellpos.size() > 0) {
+						has_velocity = true;
+					}
+					else {
+						players[evnt.peer]->avatar->SetPosition(start->_pos);
+					}
 					players[evnt.peer]->enable_avatar = true;
 					players[evnt.peer]->avatarIndex = 0;
 					players[evnt.peer]->avatar_cellpos.clear();
 					players[evnt.peer]->avatar_velocities.clear();
-					players[evnt.peer]->avatar->SetPosition(start->_pos);
+				//	players[evnt.peer]->avatar->SetPosition(start->_pos);
+				
 
 					search_as->FindBestPath(start, end);
 					players[evnt.peer]->final_path = search_as->GetFinalPath();
 					string send = "ROUT " + to_string(evnt.peer->incomingPeerID) + " ";
 
+					
 					for (std::list<const GraphNode*>::iterator it = players[evnt.peer]->final_path.begin(); it != players[evnt.peer]->final_path.end(); it++) {
 						send += to_string((*it)->_pos.x) + " " + to_string((*it)->_pos.y) + " " + to_string((*it)->_pos.z) + " ";
 						players[evnt.peer]->avatar_cellpos.push_back((*it)->_pos);
 					}
-					printf("\t Broadcasting final graph to clients.");
-		
+					printf("\t Broadcasting final graph to client.");
+				
 					SendDataToClient(&send[0], evnt.peer);
-
+					if (has_velocity) {
+						SmoothTransition(players[evnt.peer]);
+					}
 					calculate_velocities(evnt.peer);
+					
 				}
 				else
 				{
