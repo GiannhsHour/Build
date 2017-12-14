@@ -155,6 +155,7 @@ void Net1_Client::OnCleanupScene()
 	serverConnection = NULL;
 }
 
+//Generate the maze using the info recieved from server.
 void Net1_Client::GenerateMaze(string dt) {
 	if (maze) {
 		this->RemoveGameObject(maze);
@@ -193,6 +194,7 @@ void Net1_Client::GenerateMaze(string dt) {
 }
 
 
+//Create clickable ground 
 void Net1_Client::CreateGround(int maze_sz, Vector3 halfdims) {
 	
 	for (int i = 0; i < maze_sz; i++) {
@@ -243,7 +245,7 @@ void Net1_Client::OnUpdateScene(float dt)
 	//Send start end coords with left double click to the server
 	if (Window::GetMouse()->DoubleClicked(MOUSE_LEFT)&& !(prev_position == *grid_position)) {
 		*grid_position = Vector3((int)(grid_position->x * maze_size), (int)(grid_position->y * maze_size), (int)(grid_position->z * maze_size));
-		Sleep(100);
+		Sleep(120);
 			if (!sentStart) {
 				startx = grid_position->x;
 				starty = grid_position->z;
@@ -297,6 +299,7 @@ void Net1_Client::SendDataToServer(string data) {
 	enet_peer_send(serverConnection, 0, packet);
 }
 
+//Convert maze coords to world coords.
 Vector3 Net1_Client::ConvertToWorldPos(Vector3 cellpos, int maze_sz, GameObject* obj) {
 	float grid_scalar = 1.0f / (float)maze_size;
 	Matrix4 transform = obj->Render()->GetWorldTransform();
@@ -329,7 +332,8 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 		{   //printf("\t Received data from server %d. Data length: %d \n", evnt.peer->incomingPeerID, evnt.packet->dataLength);
 			string id = extractId(evnt.packet->data);
 			string data = extractData(evnt.packet->data, evnt.packet->dataLength);
-		
+		    
+			// Receive maze size and density from server to create the maze . Respond "OOKK" so the server can send the actual walls ( bool );
 			if (id == "INIT") 
 			{
 				stringstream ss;
@@ -345,10 +349,12 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				string response = "OOKK";
 				SendDataToServer(response);
 			}
+			//Receive walls to build maze.
 			else if (id == "MAZE") {
 				GenerateMaze(data);
 			}
 
+			// Receive receive path coords to create and draw the final path.
 			else if (id == "ROUT") {
 
 				path_vec.clear();
@@ -375,6 +381,8 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 				}
 			
 			}
+
+			//Receive position of all the players
 			else if (id == "POSI") {
 				stringstream ss;
 				ss << data;
@@ -395,6 +403,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 					}
 				}
 			}
+			//Receive position of all the Enemies
 			else if (id == "ENEM") {
 				if (num_enem > 0) {
 					stringstream ss;
@@ -418,6 +427,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 					}
 				}
 			}
+			//Connect tou server and receive the current number of clients connected to render them when maze is created;
 			else if (id == "CONN") {
 				
 				stringstream ss;
@@ -432,7 +442,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 					}
 					avatars[to_string(i)] = CommonUtils::BuildCuboidObject("avatar",
 						Vector3(0, 0, 0),								//Position
-						Vector3(0.05f, 0.5f, 0.05f),				//Half dimensions
+						Vector3(0.05f, 0.05f, 0.05f),				//Half dimensions
 						false,									//Has Physics Object
 						0.5f,									//Infinite Mass
 						false,									//Has Collision Shape
@@ -451,7 +461,7 @@ void Net1_Client::ProcessNetworkEvent(const ENetEvent& evnt)
 		break;
 
 
-	//Server has disconnected
+	//Server has disconnected. Attempt to reconnect
 	case ENET_EVENT_TYPE_DISCONNECT:
 		{
 			NCLDebug::Log(status_color3, "Network: Server has disconnected!");

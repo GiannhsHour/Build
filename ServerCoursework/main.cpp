@@ -122,6 +122,7 @@ string extractData(enet_uint8* packet, int length) {
 	else return "";
 }
 
+//Calculate and save the velocities of the final path.
 void calculate_velocities(ENetPeer* peer) {
 	for (int i = 0; i < players[peer]->avatar_cellpos.size(); i++) {
 	
@@ -144,13 +145,12 @@ void calculate_velocities(ENetPeer* peer) {
 		
 	}
 
-
 }
 
-//Based on Damianos Gouzgouris implementation for smooth transition after giving new coordinates to the server.
+//Based on Damianos Gouzkouris implementation for smooth transition after giving new coordinates to the server.
 void SmoothTransition(Player* player) {
 	if (player->avatar_cellpos.size() > 1) {
-		if (player->avatar_cellpos[0].x !=  player->avatar_cellpos[1].x) {
+		if (player->avatar_cellpos[0].x != player->avatar_cellpos[1].x) {
 			if ((player->avatar->GetPosition().x < player->avatar_cellpos[0].x) == (player->avatar->GetPosition().x > player->avatar_cellpos[1].x)) {
 				player->avatar_cellpos[0] = player->avatar->GetPosition();
 			}
@@ -158,6 +158,7 @@ void SmoothTransition(Player* player) {
 				player->avatar_cellpos.insert(player->avatar_cellpos.begin(), player->avatar->GetPosition());
 			}
 		}
+		
 		else if (player->avatar_cellpos[0].y != player->avatar_cellpos[1].y) {
 			if ((player->avatar->GetPosition().y < player->avatar_cellpos[0].y) == (player->avatar->GetPosition().y > player->avatar_cellpos[1].y)) {
 				player->avatar_cellpos[0] = player->avatar->GetPosition();
@@ -169,6 +170,8 @@ void SmoothTransition(Player* player) {
 	}
 }
 
+
+// Update players positions based on velocities
 void UpdatePlayerPositions() {
 	players_v.clear();
 	//Update position for all avatars;
@@ -198,6 +201,7 @@ void UpdatePlayerPositions() {
 	BroadcastData(&send[0]);
 }
 
+// Update Enemy positions and send them to clients (FSM with 2 states used)
 void UpdateEnemyPositions() {
 	if (enemies.size() > 0) {
 		string send = "ENEM ";
@@ -253,6 +257,7 @@ int main(int arcg, char** argv)
 			switch (evnt.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT: {
+				//Create a player when connected
 				printf("-%d Client Connected\n", evnt.peer->incomingPeerID);
 				clients_connected++;
 				Player *p = new Player();
@@ -276,7 +281,7 @@ int main(int arcg, char** argv)
 				string id = extractId(evnt.packet->data);
 				string data = extractData(evnt.packet->data, evnt.packet->dataLength);
 				string client_id = to_string(evnt.peer->incomingPeerID);
-				
+				//Receive maze size and density from client to generate and send back maze info.
 				if (id == "INIT") {
 				     
 					for (int i = 0; i < enemies.size(); i++) {
@@ -312,6 +317,7 @@ int main(int arcg, char** argv)
 					}
 
 				}
+				//All clients received maze size and density. Send them the maze info.
 				else if (id == "OOKK") {
 					printf("\t Sending data to Clients!\n");
 					string send = "MAZE ";
@@ -320,6 +326,7 @@ int main(int arcg, char** argv)
 					}
 					BroadcastData(&send[0]);
 				}
+				//Send the client the final path to draw and render (based on a star)
 				else if (id == "CRDS") {
 					printf("\t Received coords for start and end point: %s\n", data.c_str());
 					SearchAStar* search_as = new SearchAStar();
