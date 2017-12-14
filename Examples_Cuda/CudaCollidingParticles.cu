@@ -8,12 +8,12 @@
 struct CopyToOpenGL
 {
 	__host__ __device__
-	float3 operator()(const Particle& p)
+		float3 operator()(const Particle& p)
 	{
 		//Particles are go from 0 - grid width, and we want it to be centred on 0,0,0!
 		const float world_dim = PARTICLE_GRID_SIZE * PARTICLE_GRID_CELL_SIZE;
 		const float3 world_offset = make_float3(world_dim * 0.5f, 0.0f, world_dim * 0.5f);
-		
+
 		float3 centred_pos = p._pos - world_offset;
 		return make_float3(centred_pos.x, centred_pos.y, centred_pos.z);
 	}
@@ -67,7 +67,7 @@ struct CopyToOpenGL
 
 
 
- 
+
 __host__ __device__
 int3 GetGridCell(const float3& pos)
 {
@@ -103,7 +103,7 @@ struct GetCellGridIndex
 	GetCellGridIndex() {}
 
 	__host__ __device__
-	uint operator()(const Particle& p) const
+		uint operator()(const Particle& p) const
 	{
 		int3 cell = GetGridCell(p._pos);
 		return GetGridCellHash(cell);
@@ -113,7 +113,7 @@ struct GetCellGridIndex
 
 //Given a particle p, check for and collide it with all particles in the given cell index
 __device__
-void CollideParticleWithCell(float baumgarte_factor, uint particle_idx, Particle& particle,	Particle& out_particle,
+void CollideParticleWithCell(float baumgarte_factor, uint particle_idx, Particle& particle, Particle& out_particle,
 	int3 cell,
 	Particle* all_particles, uint* grid_cell_start, uint* grid_cell_end)
 {
@@ -131,7 +131,7 @@ void CollideParticleWithCell(float baumgarte_factor, uint particle_idx, Particle
 			continue;
 
 		Particle other_particle = all_particles[arr_idx];
-		
+
 		//Do a quick sphere-sphere test
 		float3 ab = other_particle._pos - particle._pos;
 		float lengthSq = dot(ab, ab);
@@ -144,13 +144,13 @@ void CollideParticleWithCell(float baumgarte_factor, uint particle_idx, Particle
 			float3 abn = ab / len;
 
 			//Direct normal collision (no friction/shear)
-			float abnVel = dot(other_particle._vel - particle._vel, abn);		
+			float abnVel = dot(other_particle._vel - particle._vel, abn);
 			float jn = -(abnVel * (1.f + COLLISION_ELASTICITY));
 
 			//Extra energy to overcome overlap error
 			float overlap = PARTICLE_RADIUS * 2.f - len;
 			float b = overlap * baumgarte_factor;
-			
+
 			//Normally we just add correctional energy (b) to our velocity,
 			// but with such small particles and so many collisions this quickly gets 
 			// out of control! The other way to solve positional errors is to move
@@ -161,8 +161,8 @@ void CollideParticleWithCell(float baumgarte_factor, uint particle_idx, Particle
 			// around with these values though! :)
 			jn += b;
 			//out_particle._pos -= abn * overlap * 0.5f; //Half positional correction, half because were only applying to A and not A + B
-			
-			
+
+
 			jn = max(jn, 0.0f);
 			//We just assume each particle is the same mass, so half the velocity change is applied to each.
 			out_particle._vel -= abn * (jn * 0.5f);
@@ -172,7 +172,7 @@ void CollideParticleWithCell(float baumgarte_factor, uint particle_idx, Particle
 }
 
 __global__
-void CollideParticles(float baumgarte_factor, uint num_particles, Particle* particles, Particle* out_particles, uint* grid_cell_start, uint* grid_cell_end)
+void CollideParticles(float baumgarte_factor, uint num_particles, Particle* particles, Particle* out_particles, uint* grid_cell_start, uint* grid_cell_end, Particle * proj, float invMass, float radius)
 {
 	uint index = blockIdx.x*blockDim.x + threadIdx.x;
 	if (index >= num_particles)
@@ -198,6 +198,37 @@ void CollideParticles(float baumgarte_factor, uint num_particles, Particle* part
 		}
 	}
 
+	
+		float offset = PARTICLE_GRID_SIZE * PARTICLE_GRID_CELL_SIZE * 0.5f;
+		float3 proj_pos = make_float3(proj->_pos.x + offset, proj->_pos.y, proj->_pos.z  + offset);
+
+		//Do a quick sphere-sphere test
+		float3 ab = proj_pos - out_p._pos;
+		float lengthSq = dot(ab, ab);
+
+		const float diameterSq = ((PARTICLE_RADIUS + radius) * (PARTICLE_RADIUS + radius)) * 4.0f;
+		if (lengthSq < diameterSq)
+		{
+			//We have a collision!
+			float len = sqrtf(lengthSq);
+			float3 abn = ab / len;
+
+			//Direct normal collision (no friction/shear)
+			float abnVel = dot(proj->_vel*0.25f - out_p._vel, abn);
+			float jn = -(abnVel * (1.f + COLLISION_ELASTICITY * 0.01f));
+
+			//Extra energy to overcome overlap error
+			float overlap = (radius + 0.5f)- len;
+			float b = overlap * baumgarte_factor;
+
+			jn += b;
+
+			jn = max(jn, 0.0f);
+			
+			out_p._vel -= abn * (jn * 0.5f) / invMass;
+			proj->_vel -= abn * (jn * 0.5f) * invMass * 0.5f;
+		}
+	
 	out_particles[index] = out_p;
 }
 
@@ -226,8 +257,6 @@ struct UpdatePositions
 		p._vel *= 0.999f;
 
 		p._pos += p._vel * _dt;
-
-
 
 		//Out of Bounds Check
 		// - Horrible branching mess... Hopefully your a better programmer than me. :(
@@ -274,18 +303,12 @@ struct UpdatePositions
 
 
 
-
-
-
-
-
-
-
 //All the code below this point is ONLY executed on the CPU
 
 CudaCollidingParticles::CudaCollidingParticles()
 	: num_particles(0)
 	, particles_ping(NULL)
+	, projectile(NULL)
 	, cGLOutPositions(NULL)
 {
 
@@ -300,7 +323,9 @@ CudaCollidingParticles::~CudaCollidingParticles()
 		gpuErrchk(cudaFree(particles_grid_cell_index));
 		gpuErrchk(cudaFree(grid_cell_start));
 		gpuErrchk(cudaFree(grid_cell_end));
+		gpuErrchk(cudaFree(projectile));
 
+		projectile = NULL;
 		particles_ping = NULL;
 	}
 
@@ -311,13 +336,11 @@ CudaCollidingParticles::~CudaCollidingParticles()
 	}
 }
 
-
-
 void CudaCollidingParticles::InitializeParticleDam(int dam_width, int dam_height, int dam_depth)
 {
-///This function could have been a lot simpler, but I wanted nicely compacted dam... >.>
+	///This function could have been a lot simpler, but I wanted nicely compacted dam... >.>
 	uint num_even_rowed_particles = dam_width * dam_depth * dam_height / 2;
-	num_particles = num_even_rowed_particles + (dam_width - 1) * (dam_depth - 1) * dam_height / 2;
+	num_particles = num_even_rowed_particles + (dam_width-1) * (dam_depth-1) * dam_height / 2;
 
 	//Allocate Particle Arrays
 	gpuErrchk(cudaMalloc(&particles_pong, num_particles * sizeof(Particle)));
@@ -336,13 +359,13 @@ void CudaCollidingParticles::InitializeParticleDam(int dam_width, int dam_height
 	const float sqrt2 = sqrt(2.f);
 
 	const float3 dam_size = make_float3(
-			dam_width * PARTICLE_RADIUS * 2.f,
-			dam_height * PARTICLE_RADIUS * (2.f + sqrt2) * 0.5f,
-			dam_depth * PARTICLE_RADIUS * 2.f);
+		dam_width * PARTICLE_RADIUS * 2.f,
+		dam_height * PARTICLE_RADIUS * (2.f + sqrt2) * 0.5f,
+		dam_depth * PARTICLE_RADIUS * 2.f);
 
 	const float world_dim = PARTICLE_GRID_SIZE * PARTICLE_GRID_CELL_SIZE - PARTICLE_RADIUS * 2.f;
 	const float3 world_size = make_float3(world_dim, world_dim, world_dim);
-	
+
 	float3 start_offset = world_size * 0.5f - dam_size * 0.5f;
 	start_offset.y = 0.0f;
 
@@ -367,7 +390,7 @@ void CudaCollidingParticles::InitializeParticleDam(int dam_width, int dam_height
 
 				int idx = ((y * dam_depth) + z) * dam_width + x;
 				tmp_particles[idx] = p;
-			}	
+			}
 		}
 	}
 
@@ -388,7 +411,7 @@ void CudaCollidingParticles::InitializeParticleDam(int dam_width, int dam_height
 				);
 				p._pos += start_offset;
 
-				int idx = ((y * (dam_depth-1)) + z) * (dam_width-1) + x;
+				int idx = ((y * (dam_depth - 1)) + z) * (dam_width - 1) + x;
 				tmp_particles[num_even_rowed_particles + idx] = p;
 			}
 		}
@@ -407,7 +430,7 @@ void CudaCollidingParticles::InitializeOpenGLVertexBuffer(GLuint buffer_idx)
 	gpuErrchk(cudaGraphicsGLRegisterBuffer(&cGLOutPositions, buffer_idx, cudaGraphicsMapFlagsNone));
 }
 
-void CudaCollidingParticles::UpdateParticles(float dt)
+void CudaCollidingParticles::UpdateParticles(float dt, Vector3 positions, Vector3* velocities, float invMass, float radius)
 {
 	//See "ALGORITHM EXPLANATION" (top of this file) for info on what is meant to be happening here.
 
@@ -420,10 +443,6 @@ void CudaCollidingParticles::UpdateParticles(float dt)
 	const float3 gravity = make_float3(0, -0.02f, 0);
 	const uint num_grid_cells = PARTICLE_GRID_SIZE*PARTICLE_GRID_SIZE*PARTICLE_GRID_SIZE;
 	const float fixed_timestep = 1.0f / 60.0f;
-	
-
-
-
 
 	//Integrate our particles through time
 	// - thrust::for_each applies a given function to each element in the array
@@ -484,14 +503,31 @@ void CudaCollidingParticles::UpdateParticles(float dt)
 	dim3 grid((num_particles + block.x - 1) / block.x, 1, 1);
 	float baumgarte_factor = 0.05f / fixed_timestep;
 
+
+	Particle* temp_proj = new Particle;
+
+
+	temp_proj->_pos = make_float3(positions.x, positions.y, positions.z);
+	temp_proj->_vel = make_float3(velocities->x, velocities->y, velocities->z);
+
+	gpuErrchk(cudaMalloc(&projectile,  sizeof(Particle)));
+	gpuErrchk(cudaMemcpy(projectile, temp_proj,  sizeof(Particle), cudaMemcpyHostToDevice));
+
 	for (int i = 0; i < 10; ++i)
 	{
-		CollideParticles<<< grid, block >>>(baumgarte_factor, num_particles, particles_ping, particles_pong, grid_cell_start, grid_cell_end);
+		CollideParticles << < grid, block >> >(baumgarte_factor, num_particles, particles_ping, particles_pong, grid_cell_start, grid_cell_end, projectile, invMass , radius);
 		std::swap(particles_ping, particles_pong);
-		
+
 		//Should really do boundary check's here...
 	}
 
+	gpuErrchk(cudaMemcpy(temp_proj, projectile, sizeof(Particle), cudaMemcpyDeviceToHost));
+	velocities->x = temp_proj->_vel.x;
+	velocities->y = temp_proj->_vel.y;
+	velocities->z = temp_proj->_vel.z;
+
+	gpuErrchk(cudaFree(projectile));
+	projectile = NULL;
 
 	//Finally, copy our particle positions to openGL to be renderered as particles.
 	size_t tmpVertexPtrSize;

@@ -29,18 +29,18 @@ public:
 	{
 		//<--- SCENE CREATION --->
 		//Create Ground
-		this->AddGameObject(BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(15.0f, 1.0f, 15.0f), true, 0.0f, true, false, Vector4(0.0f, 1.0f, 0.3f, 1.0f)));
 
 		cudaParticleProg = new CudaCollidingParticles();
 
 		//The dam size (<value> * PARTICLE_RADIUS * 2) must be smaller than the simulation world size!
-		cudaParticleProg->InitializeParticleDam(32, 32, 32);
+		cudaParticleProg->InitializeParticleDam(40, 20, 40);
 
 		uint num_particles = cudaParticleProg->GetNumParticles();
 
 		RenderNodeParticles* rnode = new RenderNodeParticles();
 		rnode->SetParticleRadius(PARTICLE_RADIUS);
-		rnode->SetColor(Vector4(1.f, 0.f, 1.f, 1.f));
+		rnode->SetColor(Vector4(1.f, 0.f, 0.0f, 1.f));
 		rnode->GeneratePositionBuffer(num_particles, NULL);
 
 		const float half_grid_world_size = PARTICLE_GRID_SIZE * PARTICLE_GRID_CELL_SIZE * 0.5f;
@@ -54,6 +54,35 @@ public:
 
 
 		cudaParticleProg->InitializeOpenGLVertexBuffer(rnode->GetGLVertexBuffer());
+	}
+
+	void spawn() {
+		{
+			//Create a projectile
+			Camera * camera = GraphicsPipeline::Instance()->GetCamera();
+			float yaw = camera->GetYaw();
+			float pitch = camera->GetPitch();
+			float fx, fz, fy;
+			fx = -sin(DegToRad(yaw));
+			fz = -cos(DegToRad(yaw));
+
+			if (projectile) {
+				this->RemoveGameObject(projectile);
+			}
+			projectile = CommonUtils::BuildSphereObject("spawned_sphere",
+				GraphicsPipeline::Instance()->GetCamera()->GetPosition(),
+				0.5f,									//Radius
+				true,									//Has Physics Object
+				1.0f / 6.0f,							//Inverse Mass
+				true,									//Has Collision Shape
+				true,									//Dragable by the user
+				Vector4(0, 1, 0, 1));		//Color
+
+			projectile->Physics()->SetLinearVelocity((Vector3(fx * 16, 5 + pitch * 0.6, fz * 16)));
+			projectile->Physics()->SetElasticity(0.5f);
+			this->AddGameObject(projectile);
+			
+		}
 	}
 
 	virtual void OnCleanupScene() override
@@ -71,10 +100,22 @@ public:
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "  No. Particles: %d", cudaParticleProg->GetNumParticles());
 
-		cudaParticleProg->UpdateParticles(dt);
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
+		{    
+			spawn();
+		}
+
+		if (projectile) {
+			Vector3* v = new Vector3(projectile->Physics()->GetLinearVelocity());
+			cudaParticleProg->UpdateParticles(dt, projectile->Physics()->GetPosition(),v , projectile->Physics()->GetInverseMass(), projectile->Physics()->GetColRadius());
+			projectile->Physics()->SetLinearVelocity(*v);
+		}
+		
+	
 	}
 
 
 protected:
 	CudaCollidingParticles* cudaParticleProg;
+	GameObject* projectile;
 };

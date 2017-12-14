@@ -32,6 +32,7 @@ struct Particle
 };
 //#pragma pack(pop)
 
+
 class CudaCollidingParticles
 {
 public:
@@ -43,10 +44,12 @@ public:
 	void InitializeParticleDam(int dam_width, int dam_height, int dam_depth);
 	void InitializeOpenGLVertexBuffer(GLuint buffer_idx);
 
-	void UpdateParticles(float dt);
+	void UpdateParticles(float dt,Vector3 positions, Vector3* velocities, float invMass, float radius);
 
 protected:
 	uint num_particles;
+
+	Particle * projectile;
 
 	//Thrust is the Cuda equiv of the std library for c++, which this
 	// class will (hopefully) show off. Though one thing to note is that
