@@ -20,18 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MazeGenerator.cpp" />
     <ClCompile Include="MazeRenderer.cpp" />
     <ClCompile Include="Net1_Client.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="MazeRenderer.h" />
     <ClInclude Include="Net1_Client.h" />
     <ClInclude Include="SearchAlgorithm.h" />
     <ClInclude Include="SearchAStar.h" />
-    <ClInclude Include="SearchBreadthFirst.h" />
-    <ClInclude Include="SearchDepthFirst.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B0E0AAEC-0469-40C2-A077-33153D4F3D80}</ProjectGuid>

@@ -128,28 +128,6 @@ public:
 	virtual void OnUpdateScene(float dt) override
 	{
 		Scene::OnUpdateScene(dt);
-		
-		//Update Rotating Objects!
-		if (Window::GetKeyboard()->KeyDown(KEYBOARD_1))
-		{
-			m_AccumTime += dt;
-
-			GameObject* orbiting_sphere1 = this->FindGameObject("orbiting_sphere1");
-			if (orbiting_sphere1 != NULL)
-			{
-				//Move orbiting sphere1 around centre object at 45 degrees per second with an orbiting radius of 75cm
-				orbiting_sphere1->Physics()->SetPosition(Vector3(
-					ss_pos.x + cosf((float)DegToRad(m_AccumTime * 45.0f)) * 0.75f,
-					ss_pos.y,
-					ss_pos.z + sinf((float)DegToRad(m_AccumTime * 45.0f)) * 0.75f));
-			}
-
-			GameObject* rotating_cuboid1 = this->FindGameObject("rotating_cuboid1");
-			if (rotating_cuboid1 != NULL)
-			{
-				rotating_cuboid1->Physics()->SetOrientation(Quaternion::AxisAngleToQuaterion(Vector3(1.0f, 0.0f, 0.0f), m_AccumTime * 45.0f));
-			}
-		}
 
 
 

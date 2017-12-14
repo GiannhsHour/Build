@@ -1,6 +1,5 @@
 #include "CudaCollidingParticles.cuh"
 
-
 //When using the thrust library, anytime you want to use an anonomous function
 // to process the array, you need to wrap it in a struct and pass that in instead.
 //For example, this method is triggered by thrust for each element in our Particle

@@ -150,11 +150,9 @@
     <ClInclude Include="helper_math.h" />
     <ClInclude Include="RenderNodeParticles.h" />
     <ClInclude Include="Scene_CollisionHandling.h" />
-    <ClInclude Include="Scene_Particles.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="CudaCollidingParticles.cu" />
-    <CudaCompile Include="CudaParticles.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

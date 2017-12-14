@@ -23,9 +23,6 @@
     <ClInclude Include="RenderNodeParticles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene_Particles.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CudaParticles.cuh">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -43,9 +40,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="CudaParticles.cu">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
     <CudaCompile Include="CudaCollidingParticles.cu">
       <Filter>Source Files</Filter>
     </CudaCompile>

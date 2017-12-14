@@ -29,8 +29,6 @@
     <ClInclude Include="MazePlayer.h" />
     <ClInclude Include="SearchAlgorithm.h" />
     <ClInclude Include="SearchAStar.h" />
-    <ClInclude Include="SearchBreadthFirst.h" />
-    <ClInclude Include="SearchDepthFirst.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3E6CB3D3-EC5E-463E-9BFD-DBF6D947D8E0}</ProjectGuid>
